@@ -21,11 +21,9 @@ package edu.arizona.cs.mbel.metadata;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.intellij.openapi.util.text.StringUtil;
 import edu.arizona.cs.mbel.MSILInputStream;
 
 /**
@@ -53,21 +51,19 @@ public class GenericTable
 	{
 		grammar = Grammar;
 
-		List<String> split = StringUtil.split(grammar, ":");
+		StringTokenizer outer = new StringTokenizer(grammar, ":");
+		name = outer.nextToken();
+		String theRest = outer.nextToken();
+		outer = new StringTokenizer(theRest, ",");
 
-		name = split.get(0);
-
-		List<String> outer = StringUtil.split(split.get(1), ",");
-
-		fieldNames = new String[outer.size()];
+		fieldNames = new String[outer.countTokens()];
 		types = new String[fieldNames.length];
 		for(int i = 0; i < fieldNames.length; i++)
 		{
-			String field = outer.get(i);
-
-			List<String> fieldtok = StringUtil.split(field, "=");
-			fieldNames[i] = fieldtok.get(0);
-			types[i] = fieldtok.get(1);
+			String field = outer.nextToken();
+			StringTokenizer fieldtok = new StringTokenizer(field, "=");
+			fieldNames[i] = fieldtok.nextToken();
+			types[i] = fieldtok.nextToken();
 		}
 
 		data = new HashMap<String, Object>(fieldNames.length);

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import edu.arizona.cs.mbel.ByteBuffer;
 import edu.arizona.cs.mbel.MSILInputStream;
-import edu.arizona.cs.mbel.metadata.GenericTable;
+import edu.arizona.cs.mbel.metadata.GenericTableValue;
 import edu.arizona.cs.mbel.metadata.TableConstants;
 import edu.arizona.cs.mbel.parse.MSILParseException;
 import edu.arizona.cs.mbel.parse.PEModule;
@@ -42,7 +42,7 @@ import edu.arizona.cs.mbel.signature.*;
 public class ModuleParser extends BaseCustomAttributeOwner
 {
 	private PEModule pe_module;
-	private GenericTable[][] tables;
+	private GenericTableValue[][] myTableValues;
 	private TableConstants tc;
 
 	private MSILInputStream in;
@@ -86,7 +86,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		in = new MSILInputStream(instream);
 		pe_module = new PEModule(in);
 		tc = pe_module.metadata.parseTableConstants(in);
-		tables = tc.getTables();
+		myTableValues = tc.getTables();
 		parse();
 	}
 
@@ -270,9 +270,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		buildFields();
 		setFieldLayouts();
 		setFieldRVAs();
-		if(tables[TableConstants.Param] != null)
+		if(myTableValues[TableConstants.Param] != null)
 		{
-			params = new ParameterInfo[tables[TableConstants.Param].length];
+			params = new ParameterInfo[myTableValues[TableConstants.Param].length];
 		}
 		buildMethods();
 		setImplMaps();
@@ -396,9 +396,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private long getMethod(long token)
 	{
 		// maps tokens through MethodPtrs, if necessary
-		if(tables[TableConstants.MethodPtr] != null)
+		if(myTableValues[TableConstants.MethodPtr] != null)
 		{
-			return tables[TableConstants.MethodPtr][(int) token - 1].getTableIndex("Method");
+			return myTableValues[TableConstants.MethodPtr][(int) token - 1].getTableIndex("Method");
 		}
 		else
 		{
@@ -408,9 +408,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getField(long token)
 	{
-		if(tables[TableConstants.FieldPtr] != null)
+		if(myTableValues[TableConstants.FieldPtr] != null)
 		{
-			return tables[TableConstants.FieldPtr][(int) token - 1].getTableIndex("Field");
+			return myTableValues[TableConstants.FieldPtr][(int) token - 1].getTableIndex("Field");
 		}
 		else
 		{
@@ -420,9 +420,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getEvent(long token)
 	{
-		if(tables[TableConstants.EventPtr] != null)
+		if(myTableValues[TableConstants.EventPtr] != null)
 		{
-			return tables[TableConstants.EventPtr][(int) token - 1].getTableIndex("Event");
+			return myTableValues[TableConstants.EventPtr][(int) token - 1].getTableIndex("Event");
 		}
 		else
 		{
@@ -432,9 +432,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getParam(long token)
 	{
-		if(tables[TableConstants.ParamPtr] != null)
+		if(myTableValues[TableConstants.ParamPtr] != null)
 		{
-			return tables[TableConstants.ParamPtr][(int) token - 1].getTableIndex("Param");
+			return myTableValues[TableConstants.ParamPtr][(int) token - 1].getTableIndex("Param");
 		}
 		else
 		{
@@ -444,9 +444,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getProperty(long token)
 	{
-		if(tables[TableConstants.PropertyPtr] != null)
+		if(myTableValues[TableConstants.PropertyPtr] != null)
 		{
-			return tables[TableConstants.PropertyPtr][(int) token - 1].getTableIndex("Property");
+			return myTableValues[TableConstants.PropertyPtr][(int) token - 1].getTableIndex("Property");
 		}
 		else
 		{
@@ -459,9 +459,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildAssemblyInfo()
 	{
 		// build Assembly table (after Module) DONE!
-		if(tables[TableConstants.Assembly] != null)
+		if(myTableValues[TableConstants.Assembly] != null)
 		{
-			GenericTable ass = tables[TableConstants.Assembly][0];
+			GenericTableValue ass = myTableValues[TableConstants.Assembly][0];
 
 			long hash = ass.getConstant("HashAlgID").longValue();
 			int maj = ass.getConstant("MajorVersion").intValue();
@@ -480,9 +480,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildAssemblyRefs()
 	{
 		// build AssemblyRef table DONE!
-		if(tables[TableConstants.AssemblyRef] != null)
+		if(myTableValues[TableConstants.AssemblyRef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.AssemblyRef];
+			GenericTableValue[] row = myTableValues[TableConstants.AssemblyRef];
 			assemblyRefs = new AssemblyRefInfo[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -504,9 +504,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildModule()
 	{
 		// build Module (after Assembly) DONE!
-		if(tables[TableConstants.Module] != null)
+		if(myTableValues[TableConstants.Module] != null)
 		{
-			GenericTable mod = tables[TableConstants.Module][0];
+			GenericTableValue mod = myTableValues[TableConstants.Module][0];
 			String name = mod.getString("Name");
 			int generation = mod.getConstant("Generation").intValue();
 			byte[] mvid = mod.getGUID("Mvid");
@@ -523,9 +523,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildModuleRefs()
 	{
 		// build ModuleRef tables DONE!
-		if(tables[TableConstants.ModuleRef] != null)
+		if(myTableValues[TableConstants.ModuleRef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.ModuleRef];
+			GenericTableValue[] row = myTableValues[TableConstants.ModuleRef];
 			moduleRefs = new ModuleRefInfo[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -555,7 +555,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildFileReferences()
 	{
 		// build Files DONE!
-		GenericTable[] table = tables[TableConstants.File];
+		GenericTableValue[] table = myTableValues[TableConstants.File];
 		if(table != null)
 		{
 			fileReferences = new FileReference[table.length];
@@ -573,9 +573,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildManifestResources() throws IOException
 	{
 		// build ManifestResources (after FileReferences) DONE!
-		if(tables[TableConstants.ManifestResource] != null)
+		if(myTableValues[TableConstants.ManifestResource] != null)
 		{
-			GenericTable[] row = tables[TableConstants.ManifestResource];
+			GenericTableValue[] row = myTableValues[TableConstants.ManifestResource];
 			mresources = new ManifestResource[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -617,7 +617,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildExportedTypes()
 	{
 		// build ExportedTypes (after File) DONE!
-		GenericTable[] table = tables[TableConstants.ExportedType];
+		GenericTableValue[] table = myTableValues[TableConstants.ExportedType];
 		if(table != null)
 		{
 			exportedTypes = new ExportedTypeRef[table.length];
@@ -660,10 +660,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildFields()
 	{
 		// build Fields (after TypeGroup) DONE!
-		if(tables[TableConstants.Field] != null)
+		if(myTableValues[TableConstants.Field] != null)
 		{
-			GenericTable[] row = tables[TableConstants.Field];
-			fields = new Field[tables[TableConstants.Field].length];
+			GenericTableValue[] row = myTableValues[TableConstants.Field];
+			fields = new Field[myTableValues[TableConstants.Field].length];
 			for(int i = 0; i < row.length; i++)
 			{
 				int Flags = row[i].getConstant("Flags").intValue();
@@ -682,10 +682,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setFieldLayouts()
 	{
 		// build FieldLayouts (after Fields) DONE!
-		if(tables[TableConstants.FieldLayout] != null)
+		if(myTableValues[TableConstants.FieldLayout] != null)
 		{
-			GenericTable[] row = tables[TableConstants.FieldLayout];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.FieldLayout];
+			for(GenericTableValue aRow : row)
 			{
 				long field = getField(aRow.getTableIndex("Field"));
 				long Offset = aRow.getConstant("Offset").longValue();
@@ -697,7 +697,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildMethods()
 	{
 		// build Methods (after Params and TypeGroup)
-		GenericTable[] row = tables[TableConstants.Method];
+		GenericTableValue[] row = myTableValues[TableConstants.Method];
 		if(row != null)
 		{
 			methods = new MethodDef[row.length];
@@ -726,10 +726,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 				List<ParameterSignature> pSigs = methods[i].getSignature().getParameters();
 
 				long startI = row[i].getTableIndex("ParamList");
-				if(!(startI == 0 || tables[TableConstants.Param] == null || startI > tables[TableConstants.Param].length))
+				if(!(startI == 0 || myTableValues[TableConstants.Param] == null || startI > myTableValues[TableConstants.Param].length))
 				{
 					// valid start of paramlist
-					long endI = tables[TableConstants.Param].length + 1;
+					long endI = myTableValues[TableConstants.Param].length + 1;
 					if(i < row.length - 1)
 					{
 						endI = Math.min(endI, row[i + 1].getTableIndex("ParamList").longValue());
@@ -737,7 +737,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 					for(long j = startI; j < endI; j++)
 					{
-						GenericTable paramTable = tables[TableConstants.Param][(int) getParam(j) - 1];
+						GenericTableValue paramTable = myTableValues[TableConstants.Param][(int) getParam(j) - 1];
 						int flags = paramTable.getConstant("Flags").intValue();
 						int seq = paramTable.getConstant("Sequence").intValue();
 						String name = paramTable.getString("Name");
@@ -760,10 +760,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setImplMaps()
 	{
 		// build ImplMaps (after Methods) DONE!
-		if(tables[TableConstants.ImplMap] != null)
+		if(myTableValues[TableConstants.ImplMap] != null)
 		{
-			GenericTable[] row = tables[TableConstants.ImplMap];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.ImplMap];
+			for(GenericTableValue aRow : row)
 			{
 				long coded = aRow.getCodedIndex("MemberForwarded");
 				long token[] = tc.parseCodedIndex(coded, TableConstants.MemberForwarded);
@@ -785,9 +785,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setDeclSecurity()
 	{
 		// build DeclSecurity (after Assembly, Method, and TypeDefs) DONE!
-		if(tables[TableConstants.DeclSecurity] != null)
+		if(myTableValues[TableConstants.DeclSecurity] != null)
 		{
-			GenericTable[] row = tables[TableConstants.DeclSecurity];
+			GenericTableValue[] row = myTableValues[TableConstants.DeclSecurity];
 			declSecurities = new DeclSecurity[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -817,9 +817,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildTypeDefs()
 	{
 		// build TypeDefs (after Field and Methods) DONE!
-		if(tables[TableConstants.TypeDef] != null)
+		if(myTableValues[TableConstants.TypeDef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.TypeDef];
+			GenericTableValue[] row = myTableValues[TableConstants.TypeDef];
 			typeDefs = new TypeDef[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -835,14 +835,14 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setFieldsAndMethods()
 	{
 		// set parents of the fields and methods (after Typedef, Method, Field) DONE!
-		if(tables[TableConstants.TypeDef] != null)
+		if(myTableValues[TableConstants.TypeDef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.TypeDef];
+			GenericTableValue[] row = myTableValues[TableConstants.TypeDef];
 
 			for(int i = 0; i < row.length; i++)
 			{
 				long fieldS = row[i].getTableIndex("FieldList");
-				if(!(fieldS == 0 || tables[TableConstants.Field] == null || fieldS > tables[TableConstants.Field].length))
+				if(!(fieldS == 0 || myTableValues[TableConstants.Field] == null || fieldS > myTableValues[TableConstants.Field].length))
 				{
 					long fieldE = fields.length + 1;
 					if(i < row.length - 1)
@@ -858,7 +858,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 				}
 
 				long methodS = row[i].getTableIndex("MethodList");
-				if(!(methodS == 0 || tables[TableConstants.Method] == null || methodS > tables[TableConstants.Method].length))
+				if(!(methodS == 0 || myTableValues[TableConstants.Method] == null || methodS > myTableValues[TableConstants.Method].length))
 				{
 					long methodE = methods.length + 1;
 					if(i < row.length - 1)
@@ -879,9 +879,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildTypeRefs()
 	{
 		// build TypeRefs (after TypeDefs and ExportedTypes) DONE!
-		if(tables[TableConstants.TypeRef] != null)
+		if(myTableValues[TableConstants.TypeRef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.TypeRef];
+			GenericTableValue[] row = myTableValues[TableConstants.TypeRef];
 			typeRefs = new TypeRef[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -951,9 +951,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildTypeSpecs()
 	{
 		// build TypeSpecs (after TypeDef and TypeRef) DONE!
-		if(tables[TableConstants.TypeSpec] != null)
+		if(myTableValues[TableConstants.TypeSpec] != null)
 		{
-			GenericTable[] row = tables[TableConstants.TypeSpec];
+			GenericTableValue[] row = myTableValues[TableConstants.TypeSpec];
 			typeSpecs = new TypeSpec[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -975,9 +975,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setSuperClasses()
 	{
 		// fill in Typedef extends (after TypeRef and TypeDef) DONE!
-		if(tables[TableConstants.TypeDef] != null)
+		if(myTableValues[TableConstants.TypeDef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.TypeDef];
+			GenericTableValue[] row = myTableValues[TableConstants.TypeDef];
 			for(int i = 0; i < row.length; i++)
 			{
 				long coded = row[i].getCodedIndex("Extends");
@@ -1008,9 +1008,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setInterfaceImpls()
 	{
 		// build InterfaceImpls (after TypeGroup) DONE!
-		if(tables[TableConstants.InterfaceImpl] != null)
+		if(myTableValues[TableConstants.InterfaceImpl] != null)
 		{
-			GenericTable[] 	row = tables[TableConstants.InterfaceImpl];
+			GenericTableValue[] 	row = myTableValues[TableConstants.InterfaceImpl];
 			interfaceImpls = new InterfaceImplementation[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -1039,9 +1039,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildProperties()
 	{
 		// build Properties DONE!
-		if(tables[TableConstants.Property] != null)
+		if(myTableValues[TableConstants.Property] != null)
 		{
-			GenericTable[] row = tables[TableConstants.Property];
+			GenericTableValue[] row = myTableValues[TableConstants.Property];
 			properties = new Property[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -1059,9 +1059,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setPropertyMaps()
 	{
 		// build PropertyMap (after TypeDefs and Property) DONE!
-		if(tables[TableConstants.PropertyMap] != null)
+		if(myTableValues[TableConstants.PropertyMap] != null)
 		{
-			GenericTable[] row = tables[TableConstants.PropertyMap];
+			GenericTableValue[] row = myTableValues[TableConstants.PropertyMap];
 			for(int i = 0; i < row.length; i++)
 			{
 				long parent = row[i].getTableIndex("Parent");
@@ -1070,7 +1070,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 					continue;
 				}
 				long propS = row[i].getTableIndex("PropertyList");
-				if(propS == 0 || tables[TableConstants.Property] == null || propS > tables[TableConstants.Property].length)
+				if(propS == 0 || myTableValues[TableConstants.Property] == null || propS > myTableValues[TableConstants.Property].length)
 				{
 					continue;
 				}
@@ -1090,10 +1090,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setNestedClasses()
 	{
 		// build NestedClasses (after TypeDefs) DONE!
-		if(tables[TableConstants.NestedClass] != null)
+		if(myTableValues[TableConstants.NestedClass] != null)
 		{
-			GenericTable[] row = tables[TableConstants.NestedClass];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.NestedClass];
+			for(GenericTableValue aRow : row)
 			{
 				long nest = aRow.getTableIndex("NestedClass");
 				long enclose = aRow.getTableIndex("EnclosingClass");
@@ -1105,10 +1105,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setClassLayouts()
 	{
 		// build ClassLayouts (after TypeDefs) DONE!
-		if(tables[TableConstants.ClassLayout] != null)
+		if(myTableValues[TableConstants.ClassLayout] != null)
 		{
-			GenericTable[] row = tables[TableConstants.ClassLayout];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.ClassLayout];
+			for(GenericTableValue aRow : row)
 			{
 				long typedef = aRow.getTableIndex("Parent");
 				int pSize = aRow.getConstant("PackingSize").intValue();
@@ -1123,10 +1123,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setFieldRVAs()
 	{
 		// build FieldRVAs (after Fields)
-		if(tables[TableConstants.FieldRVA] != null)
+		if(myTableValues[TableConstants.FieldRVA] != null)
 		{
-			GenericTable[] row = tables[TableConstants.FieldRVA];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.FieldRVA];
+			for(GenericTableValue aRow : row)
 			{
 				long RVA = aRow.getConstant("RVA").longValue();
 				long field = getField(aRow.getTableIndex("Field"));
@@ -1138,9 +1138,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildEvents()
 	{
 		// build Events (after TypeDef and TypeRef) DONE!
-		if(tables[TableConstants.Event] != null)
+		if(myTableValues[TableConstants.Event] != null)
 		{
-			GenericTable[] row = tables[TableConstants.Event];
+			GenericTableValue[] row = myTableValues[TableConstants.Event];
 			events = new Event[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -1175,9 +1175,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setEventMaps()
 	{
 		// build EventMaps (after Event) DONE!
-		if(tables[TableConstants.EventMap] != null)
+		if(myTableValues[TableConstants.EventMap] != null)
 		{
-			GenericTable[] row = tables[TableConstants.EventMap];
+			GenericTableValue[] row = myTableValues[TableConstants.EventMap];
 			for(int i = 0; i < row.length; i++)
 			{
 				long parent = row[i].getTableIndex("Parent");
@@ -1198,10 +1198,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setFieldMarshals()
 	{
 		// build FieldMarshals (after Field and Method) DONE!
-		if(tables[TableConstants.FieldMarshal] != null)
+		if(myTableValues[TableConstants.FieldMarshal] != null)
 		{
-			GenericTable[] row = tables[TableConstants.FieldMarshal];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.FieldMarshal];
+			for(GenericTableValue aRow : row)
 			{
 				long[] index = tc.parseCodedIndex(aRow.getCodedIndex("Parent"), TableConstants.HasFieldMarshal);
 				byte[] blob = aRow.getBlob("NativeType");
@@ -1222,10 +1222,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setMethodSemantics()
 	{
 		// build MethodSemantics (after Method, Event, Property) DONE!
-		if(tables[TableConstants.MethodSemantics] != null)
+		if(myTableValues[TableConstants.MethodSemantics] != null)
 		{
-			GenericTable[] row = tables[TableConstants.MethodSemantics];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.MethodSemantics];
+			for(GenericTableValue aRow : row)
 			{
 				long method = getMethod(aRow.getTableIndex("Method"));
 				int sem = aRow.getConstant("Semantics").intValue();
@@ -1270,10 +1270,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setDefaultValues()
 	{
 		// build Constants (after Field, Property, Param) DONE!
-		if(tables[TableConstants.Constant] != null)
+		if(myTableValues[TableConstants.Constant] != null)
 		{
-			GenericTable[] row = tables[TableConstants.Constant];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.Constant];
+			for(GenericTableValue aRow : row)
 			{
 				byte[] blob = aRow.getBlob("Value");
 				long coded = aRow.getCodedIndex("Parent");
@@ -1297,9 +1297,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildMemberRefs()
 	{
 		// build MemberRefs (after TypeGroup, Method, Field)
-		if(tables[TableConstants.MemberRef] != null)
+		if(myTableValues[TableConstants.MemberRef] != null)
 		{
-			GenericTable[] row = tables[TableConstants.MemberRef];
+			GenericTableValue[] row = myTableValues[TableConstants.MemberRef];
 			memberRefs = new MemberRef[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -1368,10 +1368,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setMethodMaps()
 	{
 		// build MethodImpls (after TypeGroup, MemberRef, Method)
-		if(tables[TableConstants.MethodImpl] != null)
+		if(myTableValues[TableConstants.MethodImpl] != null)
 		{
-			GenericTable[] row = tables[TableConstants.MethodImpl];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.MethodImpl];
+			for(GenericTableValue aRow : row)
 			{
 				long typedef = aRow.getTableIndex("Class");
 				long coded = aRow.getCodedIndex("MethodDeclaration");
@@ -1413,9 +1413,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildStandAloneSigs()
 	{
 		// build StandAloneSig table DONE!
-		if(tables[TableConstants.StandAloneSig] != null)
+		if(myTableValues[TableConstants.StandAloneSig] != null)
 		{
-			GenericTable[] row = tables[TableConstants.StandAloneSig];
+			GenericTableValue[] row = myTableValues[TableConstants.StandAloneSig];
 			standAloneSigs = new StandAloneSignature[row.length];
 			for(int i = 0; i < row.length; i++)
 			{
@@ -1441,7 +1441,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void buildGenericParams()
 	{
-		GenericTable[] table = tables[TableConstants.GenericParam];
+		GenericTableValue[] table = myTableValues[TableConstants.GenericParam];
 		if(table == null)
 		{
 			return;
@@ -1450,12 +1450,12 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		myGenericParams = new GenericParamDef[table.length];
 
 		int i = 0;
-		for(GenericTable genericTable : table)
+		for(GenericTableValue genericTableValue : table)
 		{
-			String name = genericTable.getString("Name");
+			String name = genericTableValue.getString("Name");
 
-			int flags = genericTable.getConstant("Flags").intValue();
-			long owner = genericTable.getTableIndex("Parent");
+			int flags = genericTableValue.getConstant("Flags").intValue();
+			long owner = genericTableValue.getTableIndex("Parent");
 
 			GenericParamOwner paramOwner = null;
 			long[] token = tc.parseCodedIndex(owner, TableConstants.TypeOrMethodDef);
@@ -1477,16 +1477,16 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void buildGenericParamConstraints()
 	{
-		GenericTable[] table = tables[TableConstants.GenericParamConstraint];
+		GenericTableValue[] table = myTableValues[TableConstants.GenericParamConstraint];
 		if(table == null)
 		{
 			return;
 		}
 
-		for(GenericTable genericTable : table)
+		for(GenericTableValue genericTableValue : table)
 		{
-			long parent = genericTable.getTableIndex("Parent");
-			long constraint = genericTable.getCodedIndex("Constraint");
+			long parent = genericTableValue.getTableIndex("Parent");
+			long constraint = genericTableValue.getCodedIndex("Constraint");
 
 			long[] values = tc.parseCodedIndex(constraint, TableConstants.TypeDefOrRefOrSpec);
 
@@ -1519,10 +1519,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setCustomAttributes()
 	{
 		// build CustomAttribute table
-		if(tables[TableConstants.CustomAttribute] != null)
+		if(myTableValues[TableConstants.CustomAttribute] != null)
 		{
-			GenericTable[] row = tables[TableConstants.CustomAttribute];
-			for(GenericTable aRow : row)
+			GenericTableValue[] row = myTableValues[TableConstants.CustomAttribute];
+			for(GenericTableValue aRow : row)
 			{
 				byte[] blob = aRow.getBlob("Value");
 				long coded = aRow.getCodedIndex("Type");

@@ -22,6 +22,7 @@ package edu.arizona.cs.mbel.metadata;
 import java.io.IOException;
 
 import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.metadata.genericTable.GenericTableDefinition;
 
 /**
  * This class contains parsing methods and constants for dealing with metadata tables.
@@ -125,56 +126,67 @@ public class TableConstants
 	public static final int MethodSpec = 0x2b;
 	public static final int GenericParamConstraint = 0x2c;
 
-	public static final String[] GRAMMAR = new String[66];
+	public static final String[] GRAMMAR_STRINGS = new String[66];
+	public static final GenericTableDefinition[] GENERIC_TABLE_DEFINITIONS = new GenericTableDefinition[66];
 
 	static
 	{
-		GRAMMAR[Assembly] = "Assembly:HashAlgID=4,MajorVersion=2,MinorVersion=2,BuildNumber=2,RevisionNumber=2,Flags=4,PublicKey=B,Name=S,Culture=S";
-		GRAMMAR[AssemblyOS] = "AssemblyOS:OSPlatformID=4,OSMajorVersion=4,OSMinorVersion=4";
-		GRAMMAR[AssemblyProcessor] = "AssemblyProcessor:Processor=4";
-		GRAMMAR[AssemblyRef] = "AssemblyRef:MajorVersion=2,MinorVersion=2,BuildNumber=2,RevisionNumber=2,Flags=4,PublicKeyOrToken=B,Name=S,Culture=S," +
+		GRAMMAR_STRINGS[Assembly] = "Assembly:HashAlgID=4,MajorVersion=2,MinorVersion=2,BuildNumber=2,RevisionNumber=2,Flags=4,PublicKey=B,Name=S,Culture=S";
+		GRAMMAR_STRINGS[AssemblyOS] = "AssemblyOS:OSPlatformID=4,OSMajorVersion=4,OSMinorVersion=4";
+		GRAMMAR_STRINGS[AssemblyProcessor] = "AssemblyProcessor:Processor=4";
+		GRAMMAR_STRINGS[AssemblyRef] = "AssemblyRef:MajorVersion=2,MinorVersion=2,BuildNumber=2,RevisionNumber=2,Flags=4,PublicKeyOrToken=B,Name=S,Culture=S," +
 				"HashValue=B";
-		GRAMMAR[AssemblyRefOS] = "AssemblyRefOS:OSPlatformID=4,OSMajorVersion=4,OSMinorVersion=4,AssemblyRef=T|" + AssemblyRef;
-		GRAMMAR[AssemblyRefProcessor] = "AssemblyRefProcessor:Processor=4,AssemblyRef=T|" + AssemblyRef;
-		GRAMMAR[ClassLayout] = "ClassLayout:PackingSize=2,ClassSize=4,Parent=T|" + TypeDef;
-		GRAMMAR[Constant] = "Constant:Type=1,Padding=1,Parent=C|" + HasConst + ",Value=B";
-		GRAMMAR[CustomAttribute] = "CustomAttribute:Parent=C|" + HasCustomAttribute + ",Type=C|" + CustomAttributeType + ",Value=B";
-		GRAMMAR[DeclSecurity] = "DeclSecurity:Action=2,Parent=C|" + HasDeclSecurity + ",PermissionSet=B";
-		GRAMMAR[ENCLog] = "ENCLog:Token=4,FuncCode=4";
-		GRAMMAR[ENCMap] = "ENCMap:Token=4";
-		GRAMMAR[EventMap] = "EventMap:Parent=T|" + TypeDef + ",EventList=T|" + Event;
-		GRAMMAR[Event] = "Event:EventFlags=2,Name=S,EventType=C|" + TypeDefOrRefOrSpec;
-		GRAMMAR[EventPtr] = "EventPtr:Event=T|" + Event;
-		GRAMMAR[ExportedType] = "ExportedType:Flags=4,TypeDefID=4,TypeName=S,TypeNamespace=S,Implementation=C|" + Implementation;
-		GRAMMAR[Field] = "Field:Flags=2,Name=S,Signature=B";
-		GRAMMAR[FieldLayout] = "FieldLayout:Offset=4,Field=T|" + Field;
-		GRAMMAR[FieldPtr] = "FieldPtr:Field=T|" + Field;
-		GRAMMAR[FieldMarshal] = "FieldMarshal:Parent=C|" + HasFieldMarshal + ",NativeType=B";
-		GRAMMAR[FieldRVA] = "FieldRVA:RVA=4,Field=T|" + Field;
-		GRAMMAR[File] = "File:Flags=4,Name=S,HashValue=B";
-		GRAMMAR[ImplMap] = "ImplMap:MappingFlags=2,MemberForwarded=C|" + MemberForwarded + ",ImportName=S,ImportScope=T|" + ModuleRef;
-		GRAMMAR[InterfaceImpl] = "InterfaceImpl:Class=T|" + TypeDef + ",Interface=C|" + TypeDefOrRefOrSpec;
-		GRAMMAR[ManifestResource] = "ManifestResource:Offset=4,Flags=4,Name=S,Implementation=C|" + Implementation;
-		GRAMMAR[MemberRef] = "MemberRef:Class=C|" + MemberRefParent + ",Name=S,Signature=B";
-		GRAMMAR[Method] = "Method:RVA=4,ImplFlags=2,Flags=2,Name=S,Signature=B,ParamList=T|" + Param;
-		GRAMMAR[MethodImpl] = "MethodImpl:Class=T|" + TypeDef + ",MethodBody=C|" + MethodDefOrRef + ",MethodDeclaration=C|" + MethodDefOrRef;
-		GRAMMAR[MethodPtr] = "MethodPtr:Method=T|" + Method;
-		GRAMMAR[MethodSemantics] = "MethodSemantics:Semantics=2,Method=T|" + Method + ",Association=C|" + HasSemantics;
-		GRAMMAR[Module] = "Module:Generation=2,Name=S,Mvid=G,EncID=G,EncBaseID=G";
-		GRAMMAR[ModuleRef] = "ModuleRef:Name=S";
-		GRAMMAR[NestedClass] = "NestedClass:NestedClass=T|" + TypeDef + ",EnclosingClass=T|" + TypeDef;
-		GRAMMAR[Param] = "Param:Flags=2,Sequence=2,Name=S";
-		GRAMMAR[ParamPtr] = "ParamPtr:Param=T|" + Param;
-		GRAMMAR[Property] = "Property:Flags=2,Name=S,Type=B";
-		GRAMMAR[PropertyMap] = "PropertyMap:Parent=T|" + TypeDef + ",PropertyList=T|" + Property;
-		GRAMMAR[PropertyPtr] = "PropertyPtr:Property=T|" + Property;
-		GRAMMAR[StandAloneSig] = "StandAloneSig:Signature=B";
-		GRAMMAR[TypeDef] = "TypeDef:Flags=4,Name=S,Namespace=S,Extends=C|" + TypeDefOrRefOrSpec + ",FieldList=T|" + Field + ",MethodList=T|" + Method;
-		GRAMMAR[TypeRef] = "TypeRef:ResolutionScope=C|" + ResolutionScope + ",Name=S,Namespace=S";
-		GRAMMAR[TypeSpec] = "TypeSpec:Signature=B";
-		GRAMMAR[GenericParam] = "GenericParam:Index=2,Flags=2,Parent=T|" + TypeOrMethodDef + ",Name=S";
-		GRAMMAR[MethodSpec] = "MethodSpec:Method=C|" + MethodDefOrRef + ",Instantiation=B";
-		GRAMMAR[GenericParamConstraint] = "GenericParamConstraint:Parent=T|" + GenericParam + ",Constraint=C|" + TypeDefOrRefOrSpec;
+		GRAMMAR_STRINGS[AssemblyRefOS] = "AssemblyRefOS:OSPlatformID=4,OSMajorVersion=4,OSMinorVersion=4,AssemblyRef=T|" + AssemblyRef;
+		GRAMMAR_STRINGS[AssemblyRefProcessor] = "AssemblyRefProcessor:Processor=4,AssemblyRef=T|" + AssemblyRef;
+		GRAMMAR_STRINGS[ClassLayout] = "ClassLayout:PackingSize=2,ClassSize=4,Parent=T|" + TypeDef;
+		GRAMMAR_STRINGS[Constant] = "Constant:Type=1,Padding=1,Parent=C|" + HasConst + ",Value=B";
+		GRAMMAR_STRINGS[CustomAttribute] = "CustomAttribute:Parent=C|" + HasCustomAttribute + ",Type=C|" + CustomAttributeType + ",Value=B";
+		GRAMMAR_STRINGS[DeclSecurity] = "DeclSecurity:Action=2,Parent=C|" + HasDeclSecurity + ",PermissionSet=B";
+		GRAMMAR_STRINGS[ENCLog] = "ENCLog:Token=4,FuncCode=4";
+		GRAMMAR_STRINGS[ENCMap] = "ENCMap:Token=4";
+		GRAMMAR_STRINGS[EventMap] = "EventMap:Parent=T|" + TypeDef + ",EventList=T|" + Event;
+		GRAMMAR_STRINGS[Event] = "Event:EventFlags=2,Name=S,EventType=C|" + TypeDefOrRefOrSpec;
+		GRAMMAR_STRINGS[EventPtr] = "EventPtr:Event=T|" + Event;
+		GRAMMAR_STRINGS[ExportedType] = "ExportedType:Flags=4,TypeDefID=4,TypeName=S,TypeNamespace=S,Implementation=C|" + Implementation;
+		GRAMMAR_STRINGS[Field] = "Field:Flags=2,Name=S,Signature=B";
+		GRAMMAR_STRINGS[FieldLayout] = "FieldLayout:Offset=4,Field=T|" + Field;
+		GRAMMAR_STRINGS[FieldPtr] = "FieldPtr:Field=T|" + Field;
+		GRAMMAR_STRINGS[FieldMarshal] = "FieldMarshal:Parent=C|" + HasFieldMarshal + ",NativeType=B";
+		GRAMMAR_STRINGS[FieldRVA] = "FieldRVA:RVA=4,Field=T|" + Field;
+		GRAMMAR_STRINGS[File] = "File:Flags=4,Name=S,HashValue=B";
+		GRAMMAR_STRINGS[ImplMap] = "ImplMap:MappingFlags=2,MemberForwarded=C|" + MemberForwarded + ",ImportName=S,ImportScope=T|" + ModuleRef;
+		GRAMMAR_STRINGS[InterfaceImpl] = "InterfaceImpl:Class=T|" + TypeDef + ",Interface=C|" + TypeDefOrRefOrSpec;
+		GRAMMAR_STRINGS[ManifestResource] = "ManifestResource:Offset=4,Flags=4,Name=S,Implementation=C|" + Implementation;
+		GRAMMAR_STRINGS[MemberRef] = "MemberRef:Class=C|" + MemberRefParent + ",Name=S,Signature=B";
+		GRAMMAR_STRINGS[Method] = "Method:RVA=4,ImplFlags=2,Flags=2,Name=S,Signature=B,ParamList=T|" + Param;
+		GRAMMAR_STRINGS[MethodImpl] = "MethodImpl:Class=T|" + TypeDef + ",MethodBody=C|" + MethodDefOrRef + ",MethodDeclaration=C|" + MethodDefOrRef;
+		GRAMMAR_STRINGS[MethodPtr] = "MethodPtr:Method=T|" + Method;
+		GRAMMAR_STRINGS[MethodSemantics] = "MethodSemantics:Semantics=2,Method=T|" + Method + ",Association=C|" + HasSemantics;
+		GRAMMAR_STRINGS[Module] = "Module:Generation=2,Name=S,Mvid=G,EncID=G,EncBaseID=G";
+		GRAMMAR_STRINGS[ModuleRef] = "ModuleRef:Name=S";
+		GRAMMAR_STRINGS[NestedClass] = "NestedClass:NestedClass=T|" + TypeDef + ",EnclosingClass=T|" + TypeDef;
+		GRAMMAR_STRINGS[Param] = "Param:Flags=2,Sequence=2,Name=S";
+		GRAMMAR_STRINGS[ParamPtr] = "ParamPtr:Param=T|" + Param;
+		GRAMMAR_STRINGS[Property] = "Property:Flags=2,Name=S,Type=B";
+		GRAMMAR_STRINGS[PropertyMap] = "PropertyMap:Parent=T|" + TypeDef + ",PropertyList=T|" + Property;
+		GRAMMAR_STRINGS[PropertyPtr] = "PropertyPtr:Property=T|" + Property;
+		GRAMMAR_STRINGS[StandAloneSig] = "StandAloneSig:Signature=B";
+		GRAMMAR_STRINGS[TypeDef] = "TypeDef:Flags=4,Name=S,Namespace=S,Extends=C|" + TypeDefOrRefOrSpec + ",FieldList=T|" + Field + ",MethodList=T|" + Method;
+		GRAMMAR_STRINGS[TypeRef] = "TypeRef:ResolutionScope=C|" + ResolutionScope + ",Name=S,Namespace=S";
+		GRAMMAR_STRINGS[TypeSpec] = "TypeSpec:Signature=B";
+		GRAMMAR_STRINGS[GenericParam] = "GenericParam:Index=2,Flags=2,Parent=T|" + TypeOrMethodDef + ",Name=S";
+		GRAMMAR_STRINGS[MethodSpec] = "MethodSpec:Method=C|" + MethodDefOrRef + ",Instantiation=B";
+		GRAMMAR_STRINGS[GenericParamConstraint] = "GenericParamConstraint:Parent=T|" + GenericParam + ",Constraint=C|" + TypeDefOrRefOrSpec;
+
+		for(int i = 0; i < GRAMMAR_STRINGS.length; i++)
+		{
+			String grammarString = GRAMMAR_STRINGS[i];
+			if(grammarString == null)
+			{
+				continue;
+			}
+			GENERIC_TABLE_DEFINITIONS[i] = GenericTableDefinition.parse(grammarString);
+		}
 	}
 
 	// BITS[i] = ceil(lg(TABLE_OPTIONS[i].length))
@@ -317,7 +329,7 @@ public class TableConstants
 	private GUIDStream guid_stream;
 	private USStream us_stream;
 	private CompressedStream c_stream;
-	private GenericTable[][] tables;
+	private GenericTableValue[][] tables;
 
 	/**
 	 * Makes a TableConstants with the given table sizes, heap sizes, and streams
@@ -375,21 +387,21 @@ public class TableConstants
 	 */
 	public void parseTables(MSILInputStream in) throws IOException
 	{
-		tables = new GenericTable[64][];
+		tables = new GenericTableValue[64][];
 
 		for(int i = 0; i < 64; i++)
 		{
 			if(c_stream.Counts[i] > 0)
 			{ // if table is present
-				tables[i] = new GenericTable[(int) c_stream.Counts[i]];
+				tables[i] = new GenericTableValue[(int) c_stream.Counts[i]];
 				for(int j = 0; j < c_stream.Counts[i]; j++)
 				{
-					String grammar = GRAMMAR[i];
+					GenericTableDefinition grammar = GENERIC_TABLE_DEFINITIONS[i];
 					if(grammar == null)
 					{
 						throw new IllegalArgumentException(i + " is bad index for grammar");
 					}
-					tables[i][j] = new GenericTable(grammar);
+					tables[i][j] = new GenericTableValue(grammar);
 					tables[i][j].parse(in, this);
 				}
 			}
@@ -399,7 +411,7 @@ public class TableConstants
 	/**
 	 * Returns all the metadata tables (should not be called until after parseTables)
 	 */
-	public GenericTable[][] getTables()
+	public GenericTableValue[][] getTables()
 	{
 		return tables;
 	}

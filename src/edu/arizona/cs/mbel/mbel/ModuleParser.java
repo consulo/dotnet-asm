@@ -943,6 +943,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 						}
 						break;
 					}
+					default:
+						System.out.println("Unsupported token in buildTypeRefs(): 0x" + Long.toHexString(token[0]));
+						break;
 				}
 			}
 		}

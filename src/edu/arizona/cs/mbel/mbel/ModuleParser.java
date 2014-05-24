@@ -1100,7 +1100,8 @@ public class ModuleParser extends BaseCustomAttributeOwner
 			{
 				long nest = aRow.getTableIndex("NestedClass");
 				long enclose = aRow.getTableIndex("EnclosingClass");
-				typeDefs[(int) enclose - 1].addNestedClass(typeDefs[(int) nest - 1]);
+
+				getByLongIndex(typeDefs, enclose).addNestedClass(getByLongIndex(typeDefs, nest));
 			}
 		}
 	}
@@ -1518,6 +1519,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		return array[(int) (index - 1)];
 	}
 
+	private static <T> void setByLongIndex(T[] array, long index, T value)
+	{
+		array[(int) (index - 1)] = value;
+	}
 
 	private void setCustomAttributes()
 	{

@@ -48,6 +48,8 @@ public class TypeDef extends TypeRef implements HasSecurity, TypeAttributes, Gen
 	private List<InterfaceImplementation> interfaces = Collections.emptyList();
 	private List<TypeDef> nestedClasses = Collections.emptyList();
 	private List<MethodMap> methodMaps = Collections.emptyList();
+
+	private TypeDef myParent;
 	////////////////////////////////////
 	private long Flags;
 
@@ -257,6 +259,7 @@ public class TypeDef extends TypeRef implements HasSecurity, TypeAttributes, Gen
 		{
 			nestedClasses = new ArrayList<TypeDef>();
 		}
+		def.setParent(this);
 		nestedClasses.add(def);
 	}
 
@@ -595,18 +598,13 @@ public class TypeDef extends TypeRef implements HasSecurity, TypeAttributes, Gen
 		return myGenericParamDefs;
 	}
 
-/*
-   public void output(){
-      System.out.print("TypeDef[Name=\"" + getName() + "\", Namespace=\"" + getNamespace() + "\"");
-      if (parent!=null){
-         System.out.print(", Parent=");
-         parent.output();
-      }
-      if (classLayout!=null){
-         System.out.print(", ClassLayout=");
-         classLayout.output();
-      }
-      System.out.print("]");
-   }
-*/
+	public TypeDef getParent()
+	{
+		return myParent;
+	}
+
+	public void setParent(TypeDef parent)
+	{
+		myParent = parent;
+	}
 }

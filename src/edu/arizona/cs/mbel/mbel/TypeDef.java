@@ -43,19 +43,19 @@ public class TypeDef extends TypeRef implements HasSecurity, TypeAttributes, Gen
 	private List<Field> fields = Collections.emptyList();
 	private List<MethodDef> methods = Collections.emptyList();
 	private List<Property> properties = Collections.emptyList();
-	private List<InterfaceImplementation> interfaces = Collections.emptyList();
+	private List<GenericParamDef> myGenericParamDefs = Collections.emptyList();
 
+	private List<InterfaceImplementation> interfaces = Collections.emptyList();
 	private List<TypeDef> nestedClasses = Collections.emptyList();
 	private List<MethodMap> methodMaps = Collections.emptyList();
 	////////////////////////////////////
 	private long Flags;
-	//////////////////////////
 
+	//////////////////////////
 	private ClassLayout classLayout;
 	private Object superClass;
-	private DeclSecurity security;
 
-	private List<GenericParamDef> myGenericParamDefs = Collections.emptyList();
+	private DeclSecurity security;
 
 	/**
 	 * Constructs a TypeDef with the given namespace, name and flags
@@ -239,14 +239,11 @@ public class TypeDef extends TypeRef implements HasSecurity, TypeAttributes, Gen
 	 * Returns the nested classes defined within this TypeDef.
 	 * This array may have length 0, but will never be null.
 	 */
-	public TypeDef[] getNestedClasses()
+	@Immutable
+	@NotNull
+	public List<TypeDef> getNestedClasses()
 	{
-		TypeDef[] nested = new TypeDef[nestedClasses.size()];
-		for(int i = 0; i < nestedClasses.size(); i++)
-		{
-			nested[i] = (TypeDef) nestedClasses.get(i);
-		}
-		return nested;
+		return nestedClasses;
 	}
 
 	/**

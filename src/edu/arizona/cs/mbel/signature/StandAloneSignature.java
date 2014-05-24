@@ -58,10 +58,11 @@ public abstract class StandAloneSignature extends Signature implements CustomAtt
 	/**
 	 * Returns a non-null array of the CustomAttributes on this MemberRef
 	 */
+	@NotNull
 	@Override
-	public CustomAttribute[] getCustomAttributes()
+	public List<CustomAttribute> getCustomAttributes()
 	{
-		return myCustomAttributes.toArray(new CustomAttribute[myCustomAttributes.size()]);
+		return myCustomAttributes;
 	}
 
 	/**

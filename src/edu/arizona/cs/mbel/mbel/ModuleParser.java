@@ -1093,10 +1093,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setNestedClasses()
 	{
 		// build NestedClasses (after TypeDefs) DONE!
-		if(myTableValues[TableConstants.NestedClass] != null)
+		GenericTableValue[] tableValue = myTableValues[TableConstants.NestedClass];
+		if(tableValue != null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.NestedClass];
-			for(GenericTableValue aRow : row)
+			for(GenericTableValue aRow : tableValue)
 			{
 				long nest = aRow.getTableIndex("NestedClass");
 				long enclose = aRow.getTableIndex("EnclosingClass");

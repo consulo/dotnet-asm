@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.consulo.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.mbel.CustomAttribute;
 
@@ -47,10 +48,12 @@ public class BaseCustomAttributeOwner implements CustomAttributeOwner
 	/**
 	 * Returns a non-null array of the CustomAttributes on this MemberRef
 	 */
+	@NotNull
 	@Override
-	public CustomAttribute[] getCustomAttributes()
+	@Immutable
+	public List<CustomAttribute> getCustomAttributes()
 	{
-		return myCustomAttributes.toArray(new CustomAttribute[myCustomAttributes.size()]);
+		return myCustomAttributes;
 	}
 
 	/**

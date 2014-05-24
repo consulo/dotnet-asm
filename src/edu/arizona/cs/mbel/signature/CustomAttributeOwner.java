@@ -16,6 +16,9 @@
 
 package edu.arizona.cs.mbel.signature;
 
+import java.util.List;
+
+import org.consulo.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.mbel.CustomAttribute;
 
@@ -27,7 +30,9 @@ public interface CustomAttributeOwner
 {
 	void addCustomAttribute(@NotNull CustomAttribute ca);
 
-	CustomAttribute[] getCustomAttributes();
+	@Immutable
+	@NotNull
+	List<CustomAttribute> getCustomAttributes();
 
 	void removeCustomAttribute(@NotNull CustomAttribute ca);
 }

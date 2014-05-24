@@ -242,6 +242,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	{
 		buildAssemblyInfo();
 		buildTypeDefs();
+		setNestedClasses();
 	}
 
 	public void parseNext() throws IOException
@@ -282,7 +283,6 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 		buildProperties();
 		setPropertyMaps();
-		setNestedClasses();
 		setClassLayouts();
 		buildEvents();
 		setEventMaps();

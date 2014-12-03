@@ -1,6 +1,6 @@
 package dontnet.asm.test;
 
-import java.io.FileInputStream;
+import java.io.File;
 
 import edu.arizona.cs.mbel.mbel.ModuleParser;
 
@@ -14,7 +14,7 @@ public class Test
 	{
 		long time = System.currentTimeMillis();
 
-		ModuleParser moduleParser = new ModuleParser(new FileInputStream("C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\mscorlib.dll"));
+		ModuleParser moduleParser = new ModuleParser(new File("C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\mscorlib.dll"));
 		moduleParser.parseNext();
 
 		long diff = System.currentTimeMillis() - time;

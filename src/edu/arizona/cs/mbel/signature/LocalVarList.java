@@ -22,7 +22,7 @@ package edu.arizona.cs.mbel.signature;
 
 import java.util.Vector;
 
-import edu.arizona.cs.mbel.ByteBuffer;
+import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
 /**

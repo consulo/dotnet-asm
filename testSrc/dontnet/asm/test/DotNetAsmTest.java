@@ -1,7 +1,6 @@
 package dontnet.asm.test;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 import edu.arizona.cs.mbel.mbel.ModuleParser;
 import edu.arizona.cs.mbel.mbel.TypeDef;
@@ -67,7 +66,7 @@ public class DotNetAsmTest extends TestCase
 		String name = getName();
 		name = name.replace("$$", "/");
 		name = name.replace("$", ".");
-		ModuleParser moduleParser = new ModuleParser(new FileInputStream(new File("testData/" + name)));
+		ModuleParser moduleParser = new ModuleParser(new File("testData/" + name));
 		moduleParser.parseNext();
 
 		myModuleParser = moduleParser;

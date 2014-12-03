@@ -21,7 +21,7 @@ package edu.arizona.cs.mbel.mbel;
 
 import java.io.IOException;
 
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 import edu.arizona.cs.mbel.metadata.TableConstants;
 
 /**

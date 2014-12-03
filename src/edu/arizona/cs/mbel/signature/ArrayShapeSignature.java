@@ -20,7 +20,7 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import edu.arizona.cs.mbel.ByteBuffer;
+import edu.arizona.cs.mbel.io.ByteBuffer;
 
 /**
  * This class describes the shape of a general array

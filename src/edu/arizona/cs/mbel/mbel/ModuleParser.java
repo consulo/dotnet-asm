@@ -19,13 +19,13 @@
 
 package edu.arizona.cs.mbel.mbel;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import edu.arizona.cs.mbel.ByteBuffer;
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.ByteBuffer;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 import edu.arizona.cs.mbel.metadata.GenericTableValue;
 import edu.arizona.cs.mbel.metadata.TableConstants;
 import edu.arizona.cs.mbel.parse.MSILParseException;
@@ -81,9 +81,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	 * Makes a ClassParser that uses the given input stream.
 	 * It is assumed that the input stream is open to the beginning of a .NET module file.
 	 */
-	public ModuleParser(InputStream instream) throws IOException, MSILParseException
+	public ModuleParser(File file) throws IOException, MSILParseException
 	{
-		in = new MSILInputStream(instream);
+		in = new MSILInputStream(file);
 		pe_module = new PEModule(in);
 		tc = pe_module.metadata.parseTableConstants(in);
 		myTableValues = tc.getTables();

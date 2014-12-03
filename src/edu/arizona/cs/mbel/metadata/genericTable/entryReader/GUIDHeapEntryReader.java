@@ -3,7 +3,7 @@ package edu.arizona.cs.mbel.metadata.genericTable.entryReader;
 import java.io.IOException;
 
 import org.jetbrains.annotations.Nullable;
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 import edu.arizona.cs.mbel.metadata.TableConstants;
 
 /**

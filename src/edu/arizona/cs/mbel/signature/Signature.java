@@ -20,7 +20,7 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import edu.arizona.cs.mbel.ByteBuffer;
+import edu.arizona.cs.mbel.io.ByteBuffer;
 
 /**
  * Superclass of all signature types. This inheritance hierarchy is just for

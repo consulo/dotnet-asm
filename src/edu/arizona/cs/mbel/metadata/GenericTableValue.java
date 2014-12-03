@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 import edu.arizona.cs.mbel.metadata.genericTable.GenericTableDefinition;
 import edu.arizona.cs.mbel.metadata.genericTable.GenericTableFieldInfo;
 

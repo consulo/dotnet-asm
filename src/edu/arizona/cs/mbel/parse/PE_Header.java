@@ -21,8 +21,8 @@ package edu.arizona.cs.mbel.parse;
 
 import java.io.IOException;
 
-import edu.arizona.cs.mbel.ByteBuffer;
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.ByteBuffer;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 
 /**
  * This class parses the PE header of a PE/COFF file

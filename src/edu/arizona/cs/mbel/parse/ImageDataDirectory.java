@@ -22,8 +22,8 @@ package edu.arizona.cs.mbel.parse;
 
 import java.io.IOException;
 
-import edu.arizona.cs.mbel.ByteBuffer;
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.ByteBuffer;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 
 /**
  * This class holds a data directory entry, which comes after the PE header in a PE/COFF file.

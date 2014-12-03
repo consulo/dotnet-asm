@@ -21,7 +21,7 @@ package edu.arizona.cs.mbel.metadata;
 
 import java.io.IOException;
 
-import edu.arizona.cs.mbel.MSILInputStream;
+import edu.arizona.cs.mbel.io.MSILInputStream;
 
 /**
  * This class stores the #GUID metadata stream.

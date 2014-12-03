@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.consulo.annotations.Immutable;
-import edu.arizona.cs.mbel.ByteBuffer;
+import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
 /**

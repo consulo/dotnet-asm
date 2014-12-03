@@ -12,10 +12,13 @@ public class Test
 {
 	public static void main(String[] args) throws Exception
 	{
-		ModuleParser moduleParser = new ModuleParser(new FileInputStream("C:\\Users\\VISTALL\\Documents\\visual studio " +
-				"2010\\Projects\\ConsoleApplication1\\ConsoleApplication1\\bin\\Debug\\ConsoleApplication1.dll"));
+		long time = System.currentTimeMillis();
 
+		ModuleParser moduleParser = new ModuleParser(new FileInputStream("C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\mscorlib.dll"));
+		moduleParser.parseNext();
 
-		System.out.println(moduleParser);
+		long diff = System.currentTimeMillis() - time;
+
+		System.out.println("Time = " + diff);
 	}
 }

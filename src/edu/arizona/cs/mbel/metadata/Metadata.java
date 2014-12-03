@@ -145,41 +145,42 @@ public class Metadata
 
 		for(int i = 0; i < Streams; i++)
 		{
-			if(stream_headers[i].rcName.toLowerCase().equals(US_STREAM_NAME) && us_stream == null)
+			String rcName = stream_headers[i].rcName;
+			if(rcName.equalsIgnoreCase(US_STREAM_NAME) && us_stream == null)
 			{
 				// Parse User String stream
 				in.seek(startFP + stream_headers[i].Offset);
 				us_stream = new USStream(in, stream_headers[i].Size);
 
 			}
-			else if(stream_headers[i].rcName.toLowerCase().equals(STRINGS_STREAM_NAME) && strings_stream == null)
+			else if(rcName.equalsIgnoreCase(STRINGS_STREAM_NAME) && strings_stream == null)
 			{
 				// Parse Strings heap stream
 				in.seek(startFP + stream_headers[i].Offset);
 				strings_stream = new StringsStream(in, stream_headers[i].Size);
 
 			}
-			else if(stream_headers[i].rcName.toLowerCase().equals(GUID_STREAM_NAME) && guid_stream == null)
+			else if(rcName.equalsIgnoreCase(GUID_STREAM_NAME) && guid_stream == null)
 			{
 				// Parse GUID heap stream
 				in.seek(startFP + stream_headers[i].Offset);
 				guid_stream = new GUIDStream(in, stream_headers[i].Size);
 
 			}
-			else if(stream_headers[i].rcName.toLowerCase().equals(BLOB_STREAM_NAME) && blob_stream == null)
+			else if(rcName.equalsIgnoreCase(BLOB_STREAM_NAME) && blob_stream == null)
 			{
 				// Parse Blob heap stream
 				in.seek(startFP + stream_headers[i].Offset);
 				blob_stream = new BlobStream(in, stream_headers[i].Size);
 
 			}
-			else if(stream_headers[i].rcName.toLowerCase().equals(COMPRESSED_STREAM_NAME) && c_stream == null)
+			else if(rcName.equalsIgnoreCase(COMPRESSED_STREAM_NAME) && c_stream == null)
 			{
 				// Parse ~ (compressed) stream
 				in.seek(startFP + stream_headers[i].Offset);
 				c_stream = new CompressedStream(in);
 			}
-			else if(stream_headers[i].rcName.toLowerCase().equals(UNCOMPRESSED_STREAM_NAME) && c_stream == null)
+			else if(rcName.equalsIgnoreCase(UNCOMPRESSED_STREAM_NAME) && c_stream == null)
 			{
 				// Parse - (uncompressed) stream
 				in.seek(startFP + stream_headers[i].Offset);
@@ -245,6 +246,8 @@ public class Metadata
  */
 class StreamHeader
 {
+	private static final int NAME_LENGTH = 16;
+
 	public long Offset;     // 4 byte offset from start of metadata
 	public long Size;       // 4 bytes, will be multiple of 4
 	public String rcName;   // null-terminated string name (<=16 chars)
@@ -259,16 +262,17 @@ class StreamHeader
 		Offset = in.readDWORD();
 		Size = in.readDWORD();
 
-		rcName = "";
-		for(int i = 0; i < 16; i++)
+		StringBuilder builder = new StringBuilder(NAME_LENGTH);
+		for(int i = 0; i < NAME_LENGTH; i++)
 		{
 			int temp = in.readBYTE();
 			if(temp == 0)
 			{
 				break;
 			}
-			rcName += (char) temp;
+			builder.append((char) temp);
 		}
+		rcName = builder.toString();
 	}
 
 	public StreamHeader(long offset, long size, String name)

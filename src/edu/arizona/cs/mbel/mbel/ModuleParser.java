@@ -1501,12 +1501,12 @@ public class ModuleParser extends BaseCustomAttributeOwner
 				TypeDef value = getByLongIndex(typeDefs, values[1]);
 				paramDef.addConstraint(value);
 			}
-			else if(values[1] == TableConstants.TypeRef)
+			else if(values[0] == TableConstants.TypeRef)
 			{
 				TypeRef value = getByLongIndex(typeRefs, values[1]);
 				paramDef.addConstraint(value);
 			}
-			else if(values[1] == TableConstants.TypeSpec)
+			else if(values[0] == TableConstants.TypeSpec)
 			{
 				TypeSpec value = getByLongIndex(typeSpecs, values[1]);
 				paramDef.addConstraint(value);

@@ -174,7 +174,7 @@ public class TableConstants
 		GRAMMAR_STRINGS[TypeDef] = "TypeDef:Flags=4,Name=S,Namespace=S,Extends=C|" + TypeDefOrRefOrSpec + ",FieldList=T|" + Field + ",MethodList=T|" + Method;
 		GRAMMAR_STRINGS[TypeRef] = "TypeRef:ResolutionScope=C|" + ResolutionScope + ",Name=S,Namespace=S";
 		GRAMMAR_STRINGS[TypeSpec] = "TypeSpec:Signature=B";
-		GRAMMAR_STRINGS[GenericParam] = "GenericParam:Index=2,Flags=2,Parent=T|" + TypeOrMethodDef + ",Name=S";
+		GRAMMAR_STRINGS[GenericParam] = "GenericParam:Index=2,Flags=2,Parent=C|" + TypeOrMethodDef + ",Name=S";
 		GRAMMAR_STRINGS[MethodSpec] = "MethodSpec:Method=C|" + MethodDefOrRef + ",Instantiation=B";
 		GRAMMAR_STRINGS[GenericParamConstraint] = "GenericParamConstraint:Parent=T|" + GenericParam + ",Constraint=C|" + TypeDefOrRefOrSpec;
 
@@ -525,7 +525,7 @@ public class TableConstants
 	{
 		// reads the correct number of bytes into a coded index long
 		// (this long can then be run through parseCodedIndex)
-		if(type < 0 || type > ResolutionScope)
+		if(type < 0 || type > TypeOrMethodDef)
 		{
 			return -1L;
 		}

@@ -60,6 +60,11 @@ public class DotNetAsmTest extends TestCase
 		assertEquals(typeDefs[2], typeDef.getNestedClasses().get(0));
 	}
 
+	public void test8$$IkvmCore$dll() throws Exception
+	{
+		assertTrue(myModuleParser != null);
+	}
+
 	@Override
 	protected void setUp() throws Exception
 	{

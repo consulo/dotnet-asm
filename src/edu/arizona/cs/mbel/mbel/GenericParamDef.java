@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import edu.arizona.cs.mbel.signature.BaseCustomAttributeOwner;
 
 /**
  * @author VISTALL
  * @since 23.11.13.
  */
-public class GenericParamDef
+public class GenericParamDef extends BaseCustomAttributeOwner
 {
 	private final String myName;
 	private final int myFlags;

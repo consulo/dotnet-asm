@@ -259,7 +259,8 @@ public class TableConstants
 					AssemblyRef,
 					File,
 					ExportedType,
-					ManifestResource
+					ManifestResource,
+					GenericParam
 			},
    /*HasFieldMarshal*/
 			{

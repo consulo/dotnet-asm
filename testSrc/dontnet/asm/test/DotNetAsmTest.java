@@ -2,6 +2,7 @@ package dontnet.asm.test;
 
 import java.io.File;
 
+import edu.arizona.cs.mbel.mbel.GenericParamDef;
 import edu.arizona.cs.mbel.mbel.ModuleParser;
 import edu.arizona.cs.mbel.mbel.TypeDef;
 import junit.framework.TestCase;
@@ -63,6 +64,19 @@ public class DotNetAsmTest extends TestCase
 	public void test8$$IkvmCore$dll() throws Exception
 	{
 		assertTrue(myModuleParser != null);
+	}
+
+	public void test9$$FSharpCore$dll() throws Exception
+	{
+		assertTrue(myModuleParser != null);
+		for(GenericParamDef genericParamDef : myModuleParser.getGenericParams())
+		{
+			if(!genericParamDef.getCustomAttributes().isEmpty())
+			{
+				return;
+			}
+		}
+		throw new IllegalArgumentException("Custom attributes not founded at any generic parameter - test failed");
 	}
 
 	@Override

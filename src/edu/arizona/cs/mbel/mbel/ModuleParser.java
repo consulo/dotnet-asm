@@ -1628,6 +1628,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 				{
 					mresources[(int) token[1] - 1].addCustomAttribute(ca);
 				}
+				else if(token[0] == TableConstants.GenericParam)
+				{
+					getByLongIndex(myGenericParams, token[1]).addCustomAttribute(ca);
+				}
 			}
 		}
 	}
@@ -1640,5 +1644,10 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	public TypeDef[] getTypeDefs()
 	{
 		return typeDefs;
+	}
+
+	public GenericParamDef[] getGenericParams()
+	{
+		return myGenericParams;
 	}
 }

@@ -20,6 +20,7 @@
 
 package edu.arizona.cs.mbel.signature;
 
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -39,13 +40,10 @@ public class ArrayTypeSignature extends TypeSpecSignature
 	 * @param type  the element type of this array
 	 * @param shape the shape of this array
 	 */
-	public ArrayTypeSignature(TypeSignature type, ArrayShapeSignature shape) throws SignatureException
+	public ArrayTypeSignature(@NotNull TypeSignature type, @NotNull ArrayShapeSignature shape)
 	{
 		this();
-		if(type == null || shape == null)
-		{
-			throw new SignatureException("ArrayTypeSignature: null values specified");
-		}
+
 		elementTypeSignature = type;
 		arrayShape = shape;
 	}

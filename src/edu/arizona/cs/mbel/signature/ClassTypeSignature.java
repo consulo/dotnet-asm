@@ -20,6 +20,7 @@
 
 package edu.arizona.cs.mbel.signature;
 
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.AbstractTypeReference;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
@@ -39,13 +40,9 @@ public class ClassTypeSignature extends TypeSignature
 	 *
 	 * @param clazz an mbel reference to the type this signature describes
 	 */
-	public ClassTypeSignature(AbstractTypeReference clazz) throws SignatureException
+	public ClassTypeSignature(@NotNull AbstractTypeReference clazz)
 	{
 		this();
-		if(clazz == null)
-		{
-			throw new SignatureException("ClassTypeSignature: null class given");
-		}
 		classType = clazz;
 	}
 

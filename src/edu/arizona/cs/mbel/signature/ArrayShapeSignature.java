@@ -40,7 +40,7 @@ public class ArrayShapeSignature extends Signature
 	 * @param Sizes    the sizes of the dimension of the array (may have <Rank elements)
 	 * @param LoBounds a list of lowerbounds for the dimension of the array (may have <Rank elements)
 	 */
-	public ArrayShapeSignature(int Rank, int[] Sizes, int[] LoBounds) throws SignatureException
+	public ArrayShapeSignature(int Rank, int[] Sizes, int[] LoBounds)
 	{
 		rank = Rank;
 		if(Sizes == null)
@@ -54,7 +54,7 @@ public class ArrayShapeSignature extends Signature
 			{
 				if(size < 0)
 				{
-					throw new SignatureException("ArrayShapeSignature: Negative array size given");
+					throw new IllegalArgumentException("ArrayShapeSignature: Negative array size given");
 				}
 			}
 		}

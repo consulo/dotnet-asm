@@ -300,6 +300,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 
 		pe_module.bufferSections(in);
+		myTableValues = null;
 	}
    
    /*

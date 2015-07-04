@@ -21,10 +21,11 @@
 package edu.arizona.cs.mbel.signature;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 
 import org.consulo.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -54,18 +55,18 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 	 * @param requiredParams the required params of this method
 	 * @param extraParams    the extra "varargs" params of this method
 	 */
-	public MethodSignature(boolean hasthis, boolean explicitthis, ReturnTypeSignature rType, ParameterSignature[] requiredParams,
+	public MethodSignature(boolean hasthis, boolean explicitthis, @NotNull ReturnTypeSignature rType, ParameterSignature[] requiredParams,
 			ParameterSignature[] extraParams) throws SignatureException
 	{
 		flags = (byte) ((hasthis ? HASTHIS : 0) | (explicitthis ? EXPLICITTHIS : 0) | VARARG);
 		if(requiredParams == null)
 		{
-			params = new ArrayList<ParameterSignature>();
+			params = Collections.emptyList();
 			requiredParamCount = 0;
 		}
 		else
 		{
-			params = new ArrayList<ParameterSignature>(requiredParams.length + 10);
+			params = new ArrayList<ParameterSignature>(requiredParams.length);
 			for(ParameterSignature requiredParam : requiredParams)
 			{
 				if(requiredParam == null)
@@ -79,6 +80,11 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 
 		if(extraParams != null)
 		{
+			if(params.isEmpty())
+			{
+				params = new ArrayList<ParameterSignature>(2);
+			}
+
 			for(ParameterSignature extraParam : extraParams)
 			{
 				if(extraParam == null)
@@ -89,11 +95,6 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 			}
 		}
 		returnType = rType;
-
-		if(returnType == null)
-		{
-			throw new SignatureException("MethodSignature: null return type");
-		}
 	}
 
 	/**
@@ -116,35 +117,30 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 	 * @param explicitthis true iff this method has an explicit 'this' pointer
 	 * @param convention  the calling convention of this method (defined in CallingConvention)
 	 * @param rType       return type signature for this method
-	 * @param Params      array of parameter signatures for this method
+	 * @param params      array of parameter signatures for this method
 	 */
-	public MethodSignature(boolean hasthis, boolean explicitthis, byte convention, ReturnTypeSignature rType,
-			ParameterSignature[] Params) throws SignatureException
+	public MethodSignature(boolean hasthis, boolean explicitthis, byte convention, @NotNull ReturnTypeSignature rType,
+			ParameterSignature[] params) throws SignatureException
 	{
 		flags = (byte) (((hasthis || explicitthis) ? HASTHIS : 0) | (explicitthis ? EXPLICITTHIS : 0) | (convention & 0x0F));
 		requiredParamCount = -1;
-		if(Params == null)
+		if(params == null)
 		{
-			params = new Vector(10);
+			this.params = Collections.emptyList();
 		}
 		else
 		{
-			params = new Vector(Params.length + 10);
-			for(ParameterSignature Param : Params)
+			this.params = new ArrayList<ParameterSignature>(params.length);
+			for(ParameterSignature param : params)
 			{
-				if(Param == null)
+				if(param == null)
 				{
 					throw new SignatureException("MethodSignature: Null param given");
 				}
-				params.add(Param);
+				this.params.add(param);
 			}
 		}
 		returnType = rType;
-
-		if(returnType == null)
-		{
-			throw new SignatureException("MethodSignature: null return type");
-		}
 	}
 
 	/**
@@ -172,7 +168,7 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 			return null;
 		}
 
-		blob.params = new Vector(paramCount + 10);
+		blob.params = paramCount == 0 ? Collections.<ParameterSignature>emptyList() : new ArrayList<ParameterSignature>(paramCount);
 		ParameterSignature temp = null;
 		blob.requiredParamCount = -1;
 		for(int i = 0; i < paramCount; i++)
@@ -286,13 +282,6 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 	public List<ParameterSignature> getParameters()
 	{
 		return params;
-	}
-	/**
-	 * Removes a parameter from this method signature (comparison by reference)
-	 */
-	public void removeParameter(ParameterSignature sig)
-	{
-		params.remove(sig);
 	}
 
 	/**

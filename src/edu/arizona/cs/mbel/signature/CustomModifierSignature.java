@@ -32,6 +32,8 @@ import edu.arizona.cs.mbel.metadata.TableConstants;
  */
 public class CustomModifierSignature extends TypeSignature
 {
+	public static final CustomModifierSignature[] EMPTY_ARRAY = new CustomModifierSignature[0];
+
 	private AbstractTypeReference type;
 
 	private CustomModifierSignature(boolean optional)

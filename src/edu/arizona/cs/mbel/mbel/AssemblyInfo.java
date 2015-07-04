@@ -19,8 +19,12 @@
 
 package edu.arizona.cs.mbel.mbel;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.consulo.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.signature.AssemblyFlags;
 import edu.arizona.cs.mbel.signature.AssemblyHashAlgorithm;
 import edu.arizona.cs.mbel.signature.BaseCustomAttributeOwner;
@@ -43,7 +47,7 @@ public class AssemblyInfo extends BaseCustomAttributeOwner implements HasSecurit
 	private String Name;
 	private String Culture;
 	private DeclSecurity security;
-	private Vector exportedTypes;
+	private List<ExportedTypeRef> exportedTypes = Collections.emptyList();
 
 	/**
 	 * Makes a new AssemblyInfo with the given information
@@ -73,21 +77,16 @@ public class AssemblyInfo extends BaseCustomAttributeOwner implements HasSecurit
 		}
 		Name = name;
 		Culture = culture;
-
-		exportedTypes = new Vector(10);
 	}
 
 	/**
 	 * Returns a non-null array of the exported types in this assembly
 	 */
-	public ExportedTypeRef[] getExportedTypes()
+	@NotNull
+	@Immutable
+	public List<ExportedTypeRef> getExportedTypes()
 	{
-		ExportedTypeRef[] refs = new ExportedTypeRef[exportedTypes.size()];
-		for(int i = 0; i < refs.length; i++)
-		{
-			refs[i] = (ExportedTypeRef) exportedTypes.get(i);
-		}
-		return refs;
+		return exportedTypes;
 	}
 
 	/**
@@ -95,6 +94,10 @@ public class AssemblyInfo extends BaseCustomAttributeOwner implements HasSecurit
 	 */
 	public void addExportedType(ExportedTypeRef ref)
 	{
+		if(exportedTypes.isEmpty())
+		{
+			exportedTypes = new ArrayList<ExportedTypeRef>(5);
+		}
 		exportedTypes.add(ref);
 	}
 

@@ -20,8 +20,12 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.consulo.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
@@ -33,7 +37,7 @@ import edu.arizona.cs.mbel.mbel.TypeGroup;
  */
 public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 {
-	private Vector customMods;   // CustomModifierSignatures
+	private List<CustomModifierSignature> customMods = Collections.emptyList();
 	private TypeSignature type;
 
 	private ParameterInfo paramInfo;
@@ -49,15 +53,10 @@ public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 	 * @param sig   the type signature of this parameter
 	 * @param byref true iff this parameter is passed by reference
 	 */
-	public ParameterSignature(TypeSignature sig, boolean byref) throws SignatureException
+	public ParameterSignature(@NotNull TypeSignature sig, boolean byref) throws SignatureException
 	{
 		super(byref ? ELEMENT_TYPE_BYREF : ELEMENT_TYPE_TYPEONLY);
-		customMods = new Vector(10);
 		type = sig;
-		if(type == null)
-		{
-			throw new SignatureException("ParameterSignature: Null type specified");
-		}
 	}
 
 	/**
@@ -66,7 +65,6 @@ public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 	public ParameterSignature()
 	{
 		super(ELEMENT_TYPE_TYPEDBYREF);
-		customMods = new Vector(10);
 	}
 
 	/**
@@ -84,6 +82,10 @@ public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 		CustomModifierSignature temp = CustomModifierSignature.parse(buffer, group);
 		while(temp != null)
 		{
+			if(blob.customMods.isEmpty())
+			{
+				blob.customMods = new ArrayList<CustomModifierSignature>(5);
+			}
 			blob.customMods.add(temp);
 			pos = buffer.getPosition();
 			temp = CustomModifierSignature.parse(buffer, group);
@@ -138,15 +140,10 @@ public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 	/**
 	 * Getter method for the CustomModifiers applied to this signature
 	 */
-	public CustomModifierSignature[] getCustomModifiers()
+	@Immutable
+	public List<CustomModifierSignature> getCustomModifiers()
 	{
-		CustomModifierSignature[] sigs = new CustomModifierSignature[customMods.size()];
-		for(int i = 0; i < sigs.length; i++)
-		{
-			sigs[i] = (CustomModifierSignature) customMods.get(i);
-		}
-
-		return sigs;
+		return customMods;
 	}
 	/**
 	 * Getter method for the type of this parameter (can be null)

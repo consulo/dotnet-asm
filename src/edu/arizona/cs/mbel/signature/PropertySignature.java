@@ -20,8 +20,12 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.consulo.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -34,7 +38,7 @@ public class PropertySignature extends Signature implements CallingConvention
 {
 	private byte flags;
 	private TypeSignature type;
-	private Vector params; // ParameterSignatures
+	private List<ParameterSignature> params = Collections.emptyList();
 
 	private PropertySignature()
 	{
@@ -46,7 +50,7 @@ public class PropertySignature extends Signature implements CallingConvention
 	 * @param Type   the type of this property
 	 * @param Params the parameters for this property
 	 */
-	public PropertySignature(TypeSignature Type, ParameterSignature[] Params) throws SignatureException
+	public PropertySignature(TypeSignature Type, @NotNull ParameterSignature[] Params) throws SignatureException
 	{
 		this(true, false, Type, Params);
 	}
@@ -57,9 +61,10 @@ public class PropertySignature extends Signature implements CallingConvention
 	 * @param hasthis      true iff this method has a 'this' pointer (i.e. is non-static)
 	 * @param explicitthis true iff this method has an explicit 'this' pointer
 	 * @param Type         the type of this property
-	 * @param Params       the parameters of this property
+	 * @param params       the parameters of this property
 	 */
-	public PropertySignature(boolean hasthis, boolean explicitthis, TypeSignature Type, ParameterSignature[] Params) throws SignatureException
+	public PropertySignature(boolean hasthis, boolean explicitthis, TypeSignature Type, @NotNull ParameterSignature[] params) throws
+			SignatureException
 	{
 		flags = (byte) (PROPERTY | ((hasthis || explicitthis) ? HASTHIS : 0) | (explicitthis ? EXPLICITTHIS : 0));
 		type = Type;
@@ -67,21 +72,10 @@ public class PropertySignature extends Signature implements CallingConvention
 		{
 			throw new SignatureException("PropertySignature: null type given");
 		}
-		if(Params == null)
+		if(params.length > 0)
 		{
-			params = new Vector(10);
-		}
-		else
-		{
-			params = new Vector(10 + Params.length);
-			for(ParameterSignature Param : Params)
-			{
-				if(Param == null)
-				{
-					throw new SignatureException("PropertySignature: null parameter given");
-				}
-				params.add(Param);
-			}
+			this.params = new ArrayList<ParameterSignature>(params.length);
+			Collections.addAll(this.params, params);
 		}
 	}
 
@@ -112,7 +106,7 @@ public class PropertySignature extends Signature implements CallingConvention
 			return null;
 		}
 
-		blob.params = new Vector(paramCount + 10);
+		blob.params = paramCount == 0 ? Collections.<ParameterSignature>emptyList() : new ArrayList<ParameterSignature>(paramCount);
 		ParameterSignature temp = null;
 		for(int i = 0; i < paramCount; i++)
 		{
@@ -134,45 +128,15 @@ public class PropertySignature extends Signature implements CallingConvention
 		return type;
 	}
 
-	/**
-	 * Returns ParameterSignatures for each parameter of this property, in order
-	 */
-	public ParameterSignature[] getParameters()
+	@NotNull
+	@Immutable
+	public List<ParameterSignature> getParameters()
 	{
-		ParameterSignature[] sigs = new ParameterSignature[params.size()];
-		for(int i = 0; i < sigs.length; i++)
-		{
-			sigs[i] = (ParameterSignature) params.get(i);
-		}
-
-		return sigs;
+		return params;
 	}
 
-	/**
-	 * Removes the given parameter from this property (comparison by reference)
-	 */
-	public void removeParameter(ParameterSignature param)
+	public byte getFlags()
 	{
-		if(param != null)
-		{
-			params.remove(param);
-		}
-	}
-
-	/**
-	 * Inserts the given parameter at index 'index'.
-	 *
-	 * @param param the parameter to insert
-	 * @param index the index at which to insert the parameter (0<=index<=getParameters().length)
-	 */
-	public void insertParameter(ParameterSignature param, int index)
-	{
-		if(param == null)
-		{
-			return;
-		}
-		index = Math.max(0, index);
-		index = Math.min(index, params.size());
-		params.insertElementAt(param, index);
+		return flags;
 	}
 }

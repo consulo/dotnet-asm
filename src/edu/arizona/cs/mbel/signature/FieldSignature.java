@@ -20,8 +20,12 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.consulo.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -32,7 +36,7 @@ import edu.arizona.cs.mbel.mbel.TypeGroup;
  */
 public class FieldSignature extends StandAloneSignature implements CallingConvention
 {
-	private Vector customMods;   // CustomModifierSignatures
+	private List<CustomModifierSignature> customMods = Collections.emptyList();
 	private TypeSignature type;
 
 	/**
@@ -42,7 +46,7 @@ public class FieldSignature extends StandAloneSignature implements CallingConven
 	 */
 	public FieldSignature(TypeSignature sig) throws SignatureException
 	{
-		this(null, sig);
+		this(CustomModifierSignature.EMPTY_ARRAY, sig);
 	}
 
 	/**
@@ -51,23 +55,17 @@ public class FieldSignature extends StandAloneSignature implements CallingConven
 	 * @param mods an array of CustomModifers to be applied to this field (can be null)
 	 * @param sig  the type signature of this field
 	 */
-	public FieldSignature(CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
+	public FieldSignature(@NotNull CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
 	{
 		if(sig == null)
 		{
 			throw new SignatureException("FieldSignature: null type specified");
 		}
 		type = sig;
-		customMods = new Vector(10);
-		if(mods != null)
+		if(mods.length > 0)
 		{
-			for(CustomModifierSignature mod : mods)
-			{
-				if(mod != null)
-				{
-					customMods.add(mod);
-				}
-			}
+			customMods = new ArrayList<CustomModifierSignature>(mods.length);
+			Collections.addAll(customMods, mods);
 		}
 	}
 
@@ -92,11 +90,14 @@ public class FieldSignature extends StandAloneSignature implements CallingConven
 			return null;
 		}
 
-		blob.customMods = new Vector(10);
 		int pos = buffer.getPosition();
 		CustomModifierSignature temp = CustomModifierSignature.parse(buffer, group);
 		while(temp != null)
 		{
+			if(blob.customMods.isEmpty())
+			{
+				blob.customMods = new ArrayList<CustomModifierSignature>(5);
+			}
 			blob.customMods.add(temp);
 			pos = buffer.getPosition();
 			temp = CustomModifierSignature.parse(buffer, group);
@@ -114,15 +115,10 @@ public class FieldSignature extends StandAloneSignature implements CallingConven
 	/**
 	 * Returns the custom modifiers applied to this field
 	 */
-	public CustomModifierSignature[] getCustomModifiers()
+	@Immutable
+	public List<CustomModifierSignature> getCustomModifiers()
 	{
-		CustomModifierSignature[] sigs = new CustomModifierSignature[customMods.size()];
-		for(int i = 0; i < sigs.length; i++)
-		{
-			sigs[i] = (CustomModifierSignature) customMods.get(i);
-		}
-
-		return sigs;
+		return customMods;
 	}
 
 	/**

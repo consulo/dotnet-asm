@@ -20,8 +20,12 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.consulo.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -33,7 +37,7 @@ import edu.arizona.cs.mbel.mbel.TypeGroup;
  */
 public class LocalVar extends Signature
 {
-	private Vector constraints;  // Constraints
+	private List<Constraint> constraints = Collections.emptyList();
 	private boolean byref;
 	private TypeSignature type;
 
@@ -43,15 +47,10 @@ public class LocalVar extends Signature
 	 * @param BYREF true if the local var is passed by reference
 	 * @param t     the type of the parameter
 	 */
-	public LocalVar(boolean BYREF, TypeSignature t) throws SignatureException
+	public LocalVar(boolean BYREF, @NotNull TypeSignature t) throws SignatureException
 	{
-		if(t == null)
-		{
-			throw new SignatureException("LocalVar: local var type is null");
-		}
 		byref = BYREF;
 		type = t;
-		constraints = new Vector(5);
 	}
 
 	/**
@@ -61,24 +60,14 @@ public class LocalVar extends Signature
 	 * @param BYREF true if this local var is passed by reference
 	 * @param t     the type of this local var
 	 */
-	public LocalVar(Constraint con[], boolean BYREF, TypeSignature t) throws SignatureException
+	public LocalVar(@NotNull Constraint con[], boolean BYREF, @NotNull TypeSignature t) throws SignatureException
 	{
-		if(t == null)
-		{
-			throw new SignatureException("LocalVar: local var type is null");
-		}
 		byref = BYREF;
 		type = t;
-		constraints = new Vector(5);
-		if(con != null)
+		if(con.length > 0)
 		{
-			for(Constraint aCon : con)
-			{
-				if(aCon != null)
-				{
-					constraints.add(aCon);
-				}
-			}
+			constraints = new ArrayList<Constraint>(con.length);
+			Collections.addAll(constraints, con);
 		}
 	}
 
@@ -97,11 +86,14 @@ public class LocalVar extends Signature
 	{
 		LocalVar blob = new LocalVar();
 
-		blob.constraints = new Vector(5);
 		int pos = buffer.getPosition();
 		Constraint temp = Constraint.parse(buffer);
 		while(temp != null)
 		{
+			if(blob.constraints.isEmpty())
+			{
+				blob.constraints = new ArrayList<Constraint>(5);
+			}
 			blob.constraints.add(temp);
 			pos = buffer.getPosition();
 			temp = Constraint.parse(buffer);
@@ -125,15 +117,11 @@ public class LocalVar extends Signature
 	/**
 	 * Getter method for the Constraints applied to this local var
 	 */
-	public Constraint[] getConstraints()
+	@NotNull
+	@Immutable
+	public List<Constraint> getConstraints()
 	{
-		Constraint[] sigs = new Constraint[constraints.size()];
-		for(int i = 0; i < sigs.length; i++)
-		{
-			sigs[i] = (Constraint) constraints.get(i);
-		}
-
-		return sigs;
+		return constraints;
 	}
 
 	/**

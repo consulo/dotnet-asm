@@ -20,8 +20,11 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -34,29 +37,19 @@ import edu.arizona.cs.mbel.mbel.TypeGroup;
  */
 public class LocalVarList extends StandAloneSignature implements CallingConvention
 {
-	private Vector localVars;    // [count]
+	private List<LocalVar> localVars = Collections.emptyList();
 
 	/**
 	 * Makes a LocalVarList from the given localVars
 	 *
 	 * @param locals an array of LocalVars (can be null. also, any null elements in the array will not be added)
 	 */
-	public LocalVarList(LocalVar[] locals)
+	public LocalVarList(@NotNull LocalVar[] locals)
 	{
-		if(locals == null)
+		if(locals.length > 0)
 		{
-			localVars = new Vector(5);
-		}
-		else
-		{
-			localVars = new Vector(locals.length + 5);
-			for(LocalVar local : locals)
-			{
-				if(local != null)
-				{
-					localVars.add(local);
-				}
-			}
+			localVars = new ArrayList<LocalVar>(locals.length);
+			Collections.addAll(localVars, locals);
 		}
 	}
 
@@ -83,7 +76,7 @@ public class LocalVarList extends StandAloneSignature implements CallingConventi
 
 		int count = readCodedInteger(buffer);
 
-		blob.localVars = new Vector(count);
+		blob.localVars = count == 0 ? Collections.<LocalVar>emptyList() : new ArrayList<LocalVar>(count);
 		LocalVar var = null;
 		for(int i = 0; i < count; i++)
 		{
@@ -110,20 +103,16 @@ public class LocalVarList extends StandAloneSignature implements CallingConventi
 	 */
 	public LocalVar[] getLocalVars()
 	{
-		LocalVar[] locals = new LocalVar[localVars.size()];
-		for(int i = 0; i < locals.length; i++)
-		{
-			locals[i] = (LocalVar) localVars.get(i);
-		}
-		return locals;
+		return localVars.toArray(new LocalVar[localVars.size()]);
 	}
 
-	public void addLocalVar(LocalVar v)
+	public void addLocalVar(@NotNull LocalVar v)
 	{
-		if(v != null)
+		if(localVars.isEmpty())
 		{
-			localVars.add(v);
+			localVars = new ArrayList<LocalVar>(5);
 		}
+		localVars.add(v);
 	}
 
 	public void removeLocalVar(LocalVar v)

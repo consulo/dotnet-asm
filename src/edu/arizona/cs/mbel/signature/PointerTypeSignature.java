@@ -20,8 +20,11 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
 
@@ -32,7 +35,7 @@ import edu.arizona.cs.mbel.mbel.TypeGroup;
  */
 public class PointerTypeSignature extends TypeSpecSignature
 {
-	private Vector customMods;   // CustomModifierSignatures
+	private List<CustomModifierSignature> customMods = Collections.emptyList();
 	private TypeSignature type;            // if null, then VOID
 
 	/**
@@ -41,7 +44,7 @@ public class PointerTypeSignature extends TypeSpecSignature
 	 * @param mods an array of CustomModifiers to be applied to this signature (can be null)
 	 * @param sig  the type of pointer this is
 	 */
-	public PointerTypeSignature(CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
+	public PointerTypeSignature(@NotNull CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
 	{
 		// for typed ptr
 		super(ELEMENT_TYPE_PTR);
@@ -51,16 +54,10 @@ public class PointerTypeSignature extends TypeSpecSignature
 		}
 		type = sig;
 
-		customMods = new Vector(10);
-		if(mods != null)
+		if(mods.length > 0)
 		{
-			for(CustomModifierSignature mod : mods)
-			{
-				if(mod != null)
-				{
-					customMods.add(mod);
-				}
-			}
+			customMods = new ArrayList<CustomModifierSignature>(mods.length);
+			Collections.addAll(customMods, mods);
 		}
 	}
 
@@ -69,22 +66,16 @@ public class PointerTypeSignature extends TypeSpecSignature
 	 *
 	 * @param mods the CustomModifiers for this pointer (can be null)
 	 */
-	public PointerTypeSignature(CustomModifierSignature[] mods) throws SignatureException
+	public PointerTypeSignature(@NotNull CustomModifierSignature[] mods) throws SignatureException
 	{
 		// for VOID ptr
 		super(ELEMENT_TYPE_PTR);
 		type = null;
 
-		customMods = new Vector(10);
-		if(mods != null)
+		if(mods.length > 0)
 		{
-			for(CustomModifierSignature mod : mods)
-			{
-				if(mod != null)
-				{
-					customMods.add(mod);
-				}
-			}
+			customMods = new ArrayList<CustomModifierSignature>(mods.length);
+			Collections.addAll(customMods, mods);
 		}
 	}
 
@@ -109,11 +100,14 @@ public class PointerTypeSignature extends TypeSpecSignature
 			return null;
 		}
 
-		blob.customMods = new Vector(10);
 		int pos = buffer.getPosition();
 		CustomModifierSignature temp = CustomModifierSignature.parse(buffer, group);
 		while(temp != null)
 		{
+			if(blob.customMods.isEmpty())
+			{
+				blob.customMods = new ArrayList<CustomModifierSignature>(5);
+			}
 			blob.customMods.add(temp);
 			pos = buffer.getPosition();
 			temp = CustomModifierSignature.parse(buffer, group);

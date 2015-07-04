@@ -20,8 +20,11 @@
 
 package edu.arizona.cs.mbel.signature;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
@@ -35,7 +38,7 @@ public class ReturnTypeSignature extends Signature implements InnerTypeOwner
 {
 	private ParameterInfo paramInfo;
 	// Signature fields
-	private Vector customMods;   // CustomModifierSignatures
+	private List<CustomModifierSignature> customMods = Collections.emptyList();
 	private TypeSignature type;
 	private byte elementType;
 	// elementType:    meaning:
@@ -46,7 +49,6 @@ public class ReturnTypeSignature extends Signature implements InnerTypeOwner
 
 	private ReturnTypeSignature()
 	{
-		customMods = new Vector(10);
 	}
 
 	/**
@@ -55,14 +57,9 @@ public class ReturnTypeSignature extends Signature implements InnerTypeOwner
 	 * @param typeSig the type of this return value
 	 * @param byref   true iff this value is returned by reference
 	 */
-	public ReturnTypeSignature(TypeSignature typeSig, boolean byref) throws SignatureException
+	public ReturnTypeSignature(@NotNull TypeSignature typeSig, boolean byref) throws SignatureException
 	{
-		this();
 		type = typeSig;
-		if(type == null)
-		{
-			throw new SignatureException("ReturnTypeSignature: Return type is null");
-		}
 		elementType = (byref ? ELEMENT_TYPE_BYREF : ELEMENT_TYPE_TYPEONLY);
 	}
 
@@ -73,7 +70,6 @@ public class ReturnTypeSignature extends Signature implements InnerTypeOwner
 	 */
 	public ReturnTypeSignature(byte typecode) throws SignatureException
 	{
-		this();
 		if(typecode == ELEMENT_TYPE_TYPEDBYREF)
 		{
 			elementType = typecode;
@@ -104,6 +100,10 @@ public class ReturnTypeSignature extends Signature implements InnerTypeOwner
 		CustomModifierSignature temp = CustomModifierSignature.parse(buffer, group);
 		while(temp != null)
 		{
+			if(blob.customMods.isEmpty())
+			{
+				blob.customMods = new ArrayList<CustomModifierSignature>(5);
+			}
 			blob.customMods.add(temp);
 			pos = buffer.getPosition();
 			temp = CustomModifierSignature.parse(buffer, group);

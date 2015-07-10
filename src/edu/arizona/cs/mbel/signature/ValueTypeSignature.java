@@ -20,6 +20,7 @@
 
 package edu.arizona.cs.mbel.signature;
 
+import org.jetbrains.annotations.NotNull;
 import edu.arizona.cs.mbel.io.ByteBuffer;
 import edu.arizona.cs.mbel.mbel.AbstractTypeReference;
 import edu.arizona.cs.mbel.mbel.TypeGroup;
@@ -38,15 +39,10 @@ public class ValueTypeSignature extends TypeSignature
 	 * Constructs a ValueTypeSignature representing the given ValueType
 	 *
 	 * @param value an AbstractTypeReference representing a ValueType
-	 * @throws SignatureException if value is not a ValueType or is null
 	 */
-	public ValueTypeSignature(AbstractTypeReference value) throws SignatureException
+	public ValueTypeSignature(@NotNull AbstractTypeReference value)
 	{
 		this();
-		if(value == null)
-		{
-			throw new SignatureException("ValueTypeSignature: Given class null");
-		}
 		valueType = value;
 	}
 

@@ -230,7 +230,7 @@ public class STypeSignatureParser
 		for(int i = 0; i < text.length(); i++)
 		{
 			char c = text.charAt(i);
-			if(Character.isLetterOrDigit(c))
+			if(Character.isLetterOrDigit(c) || c == '_')
 			{
 				if(compositor != null)
 				{

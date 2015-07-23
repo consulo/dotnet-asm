@@ -15,6 +15,13 @@ import junit.framework.Assert;
 public class STypeSignatureParserTest extends Assert
 {
 	@Test
+	public void testIssue2()
+	{
+		parseAndMergeAndDoEqual("System.Collections.Generic.Mscorlib_CollectionDebugView`1",
+				"System.Collections.Generic.Mscorlib_CollectionDebugView`1");
+	}
+
+	@Test
 	public void testLexerTokensWithGenericsButNoGeneric()
 	{
 		parseAndMergeAndDoEqual("System.Collections.Generic.List`1", "System.Collections.Generic.List`1");
@@ -33,7 +40,8 @@ public class STypeSignatureParserTest extends Assert
 	{
 		parseAndMergeAndDoEqual("System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=2.0.0.0, Culture=neutral, " +
 				"PublicKeyToken=b77a5c561934e089],[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], " +
-				"mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.Dictionary`2<System.String, System.Int32>");
+				"mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.Collections.Generic.Dictionary`2<System" +
+				".String, System.Int32>");
 	}
 
 	@Test
@@ -45,7 +53,8 @@ public class STypeSignatureParserTest extends Assert
 	@Test
 	public void testMultiLexerArray()
 	{
-		parseAndMergeAndDoEqual("System.String[,], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "System.String[0...]");
+		parseAndMergeAndDoEqual("System.String[,], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+				"System.String[0...]");
 	}
 
 	private static void parseAndMergeAndDoEqual(String text, String eq)

@@ -161,14 +161,6 @@ public class STypeSignatureParser
 	}
 
 
-	public static void main(String[] args)
-	{
-		TypeSignature parse = parse("System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=2.0.0.0, Culture=neutral, " +
-				"PublicKeyToken=b77a5c561934e089],[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], " +
-				"mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-		System.out.println("test");
-	}
-
 	private static boolean expect(Deque<LexerToken> lexerTokenDeque, LexerToken.LexerTokenType tokenType)
 	{
 		LexerToken lexerToken = lexerTokenDeque.peekFirst();

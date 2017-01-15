@@ -22,15 +22,14 @@ package consulo.internal.dotnet.asm.mbel;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import consulo.internal.dotnet.asm.signature.*;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.metadata.GenericTableValue;
 import consulo.internal.dotnet.asm.metadata.TableConstants;
 import consulo.internal.dotnet.asm.parse.MSILParseException;
 import consulo.internal.dotnet.asm.parse.PEModule;
+import consulo.internal.dotnet.asm.signature.*;
 
 /**
  * This class is all that is needed to parse a Module from a file.
@@ -74,8 +73,6 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private byte[] Mvid;                // GUID
 	private byte[] EncID;               // GUID
 	private byte[] EncBaseID;           // GUID
-
-	private AtomicBoolean myParsed = new AtomicBoolean(false);
 
 	/**
 	 * Makes a ClassParser that uses the given input stream.
@@ -243,14 +240,6 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		buildAssemblyInfo();
 		buildTypeDefs();
 		setNestedClasses();
-	}
-
-	public void parseNext() throws IOException
-	{
-		if(myParsed.getAndSet(true))
-		{
-			return;
-		}
 
 		buildModule();
 		buildModuleRefs();
@@ -302,7 +291,12 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		pe_module.bufferSections(in);
 		myTableValues = null;
 	}
-   
+
+	@Deprecated
+	public void parseNext() throws IOException
+	{
+	}
+
    /*
    public void output(){
       pe_module.output();

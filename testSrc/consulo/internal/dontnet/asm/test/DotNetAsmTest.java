@@ -86,7 +86,6 @@ public class DotNetAsmTest extends TestCase
 		name = name.replace("$$", "/");
 		name = name.replace("$", ".");
 		ModuleParser moduleParser = new ModuleParser(new File("testData/" + name));
-		moduleParser.parseNext();
 
 		myModuleParser = moduleParser;
 	}

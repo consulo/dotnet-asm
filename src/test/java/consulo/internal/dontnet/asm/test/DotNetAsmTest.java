@@ -1,7 +1,6 @@
 package consulo.internal.dontnet.asm.test;
 
-import java.io.File;
-
+import consulo.PathSearcher;
 import consulo.internal.dotnet.asm.mbel.GenericParamDef;
 import consulo.internal.dotnet.asm.mbel.ModuleParser;
 import consulo.internal.dotnet.asm.mbel.TypeDef;
@@ -85,7 +84,7 @@ public class DotNetAsmTest extends TestCase
 		String name = getName();
 		name = name.replace("$$", "/");
 		name = name.replace("$", ".");
-		ModuleParser moduleParser = new ModuleParser(new File("testData/" + name));
+		ModuleParser moduleParser = new ModuleParser(PathSearcher.getTestPath(name));
 
 		myModuleParser = moduleParser;
 	}

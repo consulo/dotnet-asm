@@ -2,11 +2,11 @@ package consulo.internal.dontnet.asm.test;
 
 import java.util.Deque;
 
+import org.junit.Assert;
 import org.junit.Test;
 import consulo.internal.dotnet.asm.LexerToken;
 import consulo.internal.dotnet.asm.STypeSignatureParser;
 import consulo.internal.dotnet.asm.signature.TypeSignature;
-import junit.framework.Assert;
 
 /**
  * @author VISTALL

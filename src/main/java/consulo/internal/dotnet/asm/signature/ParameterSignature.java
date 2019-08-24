@@ -20,15 +20,15 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.annotations.Immutable;
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class describes a parameter in a method signature
@@ -53,7 +53,7 @@ public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 	 * @param sig   the type signature of this parameter
 	 * @param byref true iff this parameter is passed by reference
 	 */
-	public ParameterSignature(@NotNull TypeSignature sig, boolean byref) throws SignatureException
+	public ParameterSignature(@Nonnull TypeSignature sig, boolean byref) throws SignatureException
 	{
 		super(byref ? ELEMENT_TYPE_BYREF : ELEMENT_TYPE_TYPEONLY);
 		type = sig;

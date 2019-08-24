@@ -20,11 +20,12 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import org.jetbrains.annotations.NotNull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.AbstractTypeReference;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 import consulo.internal.dotnet.asm.metadata.TableConstants;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class represents a ValueType type signature.
@@ -40,7 +41,7 @@ public class ValueTypeSignature extends TypeSignature
 	 *
 	 * @param value an AbstractTypeReference representing a ValueType
 	 */
-	public ValueTypeSignature(@NotNull AbstractTypeReference value)
+	public ValueTypeSignature(@Nonnull AbstractTypeReference value)
 	{
 		this();
 		valueType = value;

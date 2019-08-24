@@ -20,7 +20,7 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.AbstractTypeReference;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
@@ -40,7 +40,7 @@ public class ClassTypeSignature extends TypeSignature
 	 *
 	 * @param clazz an mbel reference to the type this signature describes
 	 */
-	public ClassTypeSignature(@NotNull AbstractTypeReference clazz)
+	public ClassTypeSignature(@Nonnull AbstractTypeReference clazz)
 	{
 		this();
 		classType = clazz;

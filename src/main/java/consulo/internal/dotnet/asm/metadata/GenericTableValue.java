@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableDefinition;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableFieldInfo;
@@ -46,7 +46,7 @@ public class GenericTableValue
 	 *
 	 * @param Grammar the grammar string for this table (one of the constants defined in TableConstants.GRAMMAR)
 	 */
-	public GenericTableValue(@NotNull GenericTableDefinition definition)
+	public GenericTableValue(@Nonnull GenericTableDefinition definition)
 	{
 		myTable = definition;
 		myValues = new HashMap<String, Object>(myTable.getFields().length);
@@ -69,7 +69,7 @@ public class GenericTableValue
 		}
 	}
 
-	@NotNull
+	@Nonnull
 	public GenericTableDefinition getTable()
 	{
 		return myTable;

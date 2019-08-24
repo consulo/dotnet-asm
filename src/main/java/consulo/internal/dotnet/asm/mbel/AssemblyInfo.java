@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.annotations.Immutable;
 import consulo.internal.dotnet.asm.signature.AssemblyFlags;
 import consulo.internal.dotnet.asm.signature.AssemblyHashAlgorithm;
@@ -81,7 +81,7 @@ public class AssemblyInfo extends BaseCustomAttributeOwner implements HasSecurit
 	/**
 	 * Returns a non-null array of the exported types in this assembly
 	 */
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<ExportedTypeRef> getExportedTypes()
 	{

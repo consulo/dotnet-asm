@@ -20,13 +20,13 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class describes a pointer type
@@ -44,7 +44,7 @@ public class PointerTypeSignature extends TypeSpecSignature
 	 * @param mods an array of CustomModifiers to be applied to this signature (can be null)
 	 * @param sig  the type of pointer this is
 	 */
-	public PointerTypeSignature(@NotNull CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
+	public PointerTypeSignature(@Nonnull CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
 	{
 		// for typed ptr
 		super(ELEMENT_TYPE_PTR);
@@ -66,7 +66,7 @@ public class PointerTypeSignature extends TypeSpecSignature
 	 *
 	 * @param mods the CustomModifiers for this pointer (can be null)
 	 */
-	public PointerTypeSignature(@NotNull CustomModifierSignature[] mods) throws SignatureException
+	public PointerTypeSignature(@Nonnull CustomModifierSignature[] mods) throws SignatureException
 	{
 		// for VOID ptr
 		super(ELEMENT_TYPE_PTR);

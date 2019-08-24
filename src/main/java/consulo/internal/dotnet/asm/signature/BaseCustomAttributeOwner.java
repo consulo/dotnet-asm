@@ -16,13 +16,13 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.annotations.Immutable;
+import consulo.internal.dotnet.asm.mbel.CustomAttribute;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-import consulo.annotations.Immutable;
-import consulo.internal.dotnet.asm.mbel.CustomAttribute;
 
 /**
  * @author VISTALL
@@ -36,7 +36,7 @@ public class BaseCustomAttributeOwner implements CustomAttributeOwner
 	 * Adds a CustomAttribute to this MemberRef
 	 */
 	@Override
-	public void addCustomAttribute(@NotNull CustomAttribute ca)
+	public void addCustomAttribute(@Nonnull CustomAttribute ca)
 	{
 		if(myCustomAttributes == Collections.<CustomAttribute>emptyList())
 		{
@@ -48,7 +48,7 @@ public class BaseCustomAttributeOwner implements CustomAttributeOwner
 	/**
 	 * Returns a non-null array of the CustomAttributes on this MemberRef
 	 */
-	@NotNull
+	@Nonnull
 	@Override
 	@Immutable
 	public List<CustomAttribute> getCustomAttributes()
@@ -60,7 +60,7 @@ public class BaseCustomAttributeOwner implements CustomAttributeOwner
 	 * Removes a CustomAttribute from thie MemberRef
 	 */
 	@Override
-	public void removeCustomAttribute(@NotNull CustomAttribute ca)
+	public void removeCustomAttribute(@Nonnull CustomAttribute ca)
 	{
 		myCustomAttributes.remove(ca);
 	}

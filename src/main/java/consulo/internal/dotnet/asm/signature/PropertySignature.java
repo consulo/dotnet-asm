@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -50,7 +50,7 @@ public class PropertySignature extends Signature implements CallingConvention
 	 * @param Type   the type of this property
 	 * @param Params the parameters for this property
 	 */
-	public PropertySignature(TypeSignature Type, @NotNull ParameterSignature[] Params) throws SignatureException
+	public PropertySignature(TypeSignature Type, @Nonnull ParameterSignature[] Params) throws SignatureException
 	{
 		this(true, false, Type, Params);
 	}
@@ -63,7 +63,7 @@ public class PropertySignature extends Signature implements CallingConvention
 	 * @param Type         the type of this property
 	 * @param params       the parameters of this property
 	 */
-	public PropertySignature(boolean hasthis, boolean explicitthis, TypeSignature Type, @NotNull ParameterSignature[] params) throws
+	public PropertySignature(boolean hasthis, boolean explicitthis, TypeSignature Type, @Nonnull ParameterSignature[] params) throws
 			SignatureException
 	{
 		flags = (byte) (PROPERTY | ((hasthis || explicitthis) ? HASTHIS : 0) | (explicitthis ? EXPLICITTHIS : 0));
@@ -128,7 +128,7 @@ public class PropertySignature extends Signature implements CallingConvention
 		return type;
 	}
 
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<ParameterSignature> getParameters()
 	{

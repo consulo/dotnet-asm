@@ -20,9 +20,10 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import org.jetbrains.annotations.NotNull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class describes an array type
@@ -40,7 +41,7 @@ public class ArrayTypeSignature extends TypeSpecSignature
 	 * @param type  the element type of this array
 	 * @param shape the shape of this array
 	 */
-	public ArrayTypeSignature(@NotNull TypeSignature type, @NotNull ArrayShapeSignature shape)
+	public ArrayTypeSignature(@Nonnull TypeSignature type, @Nonnull ArrayShapeSignature shape)
 	{
 		this();
 

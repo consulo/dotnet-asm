@@ -20,14 +20,14 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class describes the return type of a method in a method signature
@@ -57,7 +57,7 @@ public class ReturnTypeSignature extends Signature implements InnerTypeOwner
 	 * @param typeSig the type of this return value
 	 * @param byref   true iff this value is returned by reference
 	 */
-	public ReturnTypeSignature(@NotNull TypeSignature typeSig, boolean byref) throws SignatureException
+	public ReturnTypeSignature(@Nonnull TypeSignature typeSig, boolean byref) throws SignatureException
 	{
 		type = typeSig;
 		elementType = (byref ? ELEMENT_TYPE_BYREF : ELEMENT_TYPE_TYPEONLY);

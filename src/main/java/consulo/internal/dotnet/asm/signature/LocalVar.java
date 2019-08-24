@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -47,7 +47,7 @@ public class LocalVar extends Signature
 	 * @param BYREF true if the local var is passed by reference
 	 * @param t     the type of the parameter
 	 */
-	public LocalVar(boolean BYREF, @NotNull TypeSignature t) throws SignatureException
+	public LocalVar(boolean BYREF, @Nonnull TypeSignature t) throws SignatureException
 	{
 		byref = BYREF;
 		type = t;
@@ -60,7 +60,7 @@ public class LocalVar extends Signature
 	 * @param BYREF true if this local var is passed by reference
 	 * @param t     the type of this local var
 	 */
-	public LocalVar(@NotNull Constraint con[], boolean BYREF, @NotNull TypeSignature t) throws SignatureException
+	public LocalVar(@Nonnull Constraint con[], boolean BYREF, @Nonnull TypeSignature t) throws SignatureException
 	{
 		byref = BYREF;
 		type = t;
@@ -117,7 +117,7 @@ public class LocalVar extends Signature
 	/**
 	 * Getter method for the Constraints applied to this local var
 	 */
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<Constraint> getConstraints()
 	{

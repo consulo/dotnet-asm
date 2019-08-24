@@ -2,9 +2,10 @@ package consulo.internal.dotnet.asm.metadata.genericTable.entryReader;
 
 import java.io.IOException;
 
-import org.jetbrains.annotations.Nullable;
 import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.metadata.TableConstants;
+
+import javax.annotation.Nullable;
 
 /**
  * @author VISTALL

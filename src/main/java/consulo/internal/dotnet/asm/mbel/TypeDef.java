@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.annotations.Immutable;
 import consulo.internal.dotnet.asm.signature.TypeAttributes;
 
@@ -242,7 +242,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 * This array may have length 0, but will never be null.
 	 */
 	@Immutable
-	@NotNull
+	@Nonnull
 	public List<TypeDef> getNestedClasses()
 	{
 		return nestedClasses;
@@ -253,7 +253,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param def the inner class TypeDef
 	 */
-	public void addNestedClass(@NotNull TypeDef def)
+	public void addNestedClass(@Nonnull TypeDef def)
 	{
 		if(nestedClasses == Collections.<TypeDef>emptyList())
 		{
@@ -280,7 +280,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param event the event to add
 	 */
-	public void addEvent(@NotNull Event event)
+	public void addEvent(@Nonnull Event event)
 	{
 		if(events == Collections.<Event>emptyList())
 		{
@@ -326,7 +326,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param field the field to add
 	 */
-	public void addField(@NotNull Field field)
+	public void addField(@Nonnull Field field)
 	{
 		if(fields == Collections.<Field>emptyList())
 		{
@@ -386,7 +386,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param method the method to add
 	 */
-	public void addMethod(@NotNull MethodDef method)
+	public void addMethod(@Nonnull MethodDef method)
 	{
 		if(methods == Collections.<MethodDef>emptyList())
 		{
@@ -419,7 +419,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @return a non-null array of methods
 	 */
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<MethodDef> getMethods()
 	{
@@ -433,7 +433,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param prop the property to add
 	 */
-	public void addProperty(@NotNull Property prop)
+	public void addProperty(@Nonnull Property prop)
 	{
 		if(properties == Collections.<Property>emptyList())
 		{
@@ -465,7 +465,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @return a non-null array of properties
 	 */
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<Property> getProperties()
 	{
@@ -479,7 +479,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param inter the InterfaceImplementation for the given interface
 	 */
-	public void addInterface(@NotNull InterfaceImplementation inter)
+	public void addInterface(@Nonnull InterfaceImplementation inter)
 	{
 		if(interfaces == Collections.<InterfaceImplementation>emptyList())
 		{
@@ -520,7 +520,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @return a non-null array of interfaces
 	 */
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<InterfaceImplementation> getInterfaceImplementations()
 	{
@@ -544,7 +544,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param map MethodMap to add
 	 */
-	public void addMethodMap(@NotNull MethodMap map)
+	public void addMethodMap(@Nonnull MethodMap map)
 	{
 		if(methodMaps == Collections.<MethodMap>emptyList())
 		{
@@ -558,7 +558,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param map the MethodMap to remove
 	 */
-	public void removeMethodMap(@NotNull MethodMap map)
+	public void removeMethodMap(@Nonnull MethodMap map)
 	{
 		methodMaps.remove(map);
 	}
@@ -590,7 +590,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 		myGenericParamDefs.add(genericParamDef);
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	@Immutable
 	public List<GenericParamDef> getGenericParams()

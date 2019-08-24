@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.signature.MethodAttributes;
 import consulo.internal.dotnet.asm.signature.MethodImplAttributes;
 import consulo.internal.dotnet.asm.signature.MethodSignature;
@@ -238,7 +238,7 @@ public class MethodDef extends MethodDefOrRef implements MethodAttributes,
 		myGenericParamDefs.add(genericParamDef);
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	@Immutable
 	public List<GenericParamDef> getGenericParams()

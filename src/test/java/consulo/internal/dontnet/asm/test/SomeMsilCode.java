@@ -1,7 +1,7 @@
 package consulo.internal.dontnet.asm.test;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import consulo.internal.dotnet.asm.signature.*;
 import consulo.internal.dotnet.asm.mbel.TypeDef;
 import consulo.internal.dotnet.asm.mbel.TypeRef;
@@ -154,7 +154,7 @@ public class SomeMsilCode implements SignatureConstants
 		}
 	}
 
-	public static void appendTypeRefFullName(@NotNull StringBuilder builder, String namespace, @NotNull String name)
+	public static void appendTypeRefFullName(@Nonnull StringBuilder builder, String namespace, @Nonnull String name)
 	{
 		if(namespace != null && !namespace.isEmpty())
 		{
@@ -167,7 +167,7 @@ public class SomeMsilCode implements SignatureConstants
 	}
 
 
-	public static void toStringFromDefRefSpec(@NotNull StringBuilder builder, @NotNull Object o, @Nullable TypeDef typeDef)
+	public static void toStringFromDefRefSpec(@Nonnull StringBuilder builder, @Nonnull Object o, @Nullable TypeDef typeDef)
 	{
 		if(o instanceof TypeDef)
 		{

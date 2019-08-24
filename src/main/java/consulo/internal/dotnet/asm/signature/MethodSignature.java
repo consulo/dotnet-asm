@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -55,8 +55,8 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 	 * @param requiredParams the required params of this method
 	 * @param extraParams    the extra "varargs" params of this method
 	 */
-	public MethodSignature(boolean hasthis, boolean explicitthis, @NotNull ReturnTypeSignature rType, ParameterSignature[] requiredParams,
-			ParameterSignature[] extraParams) throws SignatureException
+	public MethodSignature(boolean hasthis, boolean explicitthis, @Nonnull ReturnTypeSignature rType, ParameterSignature[] requiredParams,
+						   ParameterSignature[] extraParams) throws SignatureException
 	{
 		flags = (byte) ((hasthis ? HASTHIS : 0) | (explicitthis ? EXPLICITTHIS : 0) | VARARG);
 		if(requiredParams == null)
@@ -119,7 +119,7 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 	 * @param rType       return type signature for this method
 	 * @param params      array of parameter signatures for this method
 	 */
-	public MethodSignature(boolean hasthis, boolean explicitthis, byte convention, @NotNull ReturnTypeSignature rType,
+	public MethodSignature(boolean hasthis, boolean explicitthis, byte convention, @Nonnull ReturnTypeSignature rType,
 			ParameterSignature[] params) throws SignatureException
 	{
 		flags = (byte) (((hasthis || explicitthis) ? HASTHIS : 0) | (explicitthis ? EXPLICITTHIS : 0) | (convention & 0x0F));

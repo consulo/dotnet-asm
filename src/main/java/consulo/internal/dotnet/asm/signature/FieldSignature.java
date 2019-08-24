@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -55,7 +55,7 @@ public class FieldSignature extends StandAloneSignature implements CallingConven
 	 * @param mods an array of CustomModifers to be applied to this field (can be null)
 	 * @param sig  the type signature of this field
 	 */
-	public FieldSignature(@NotNull CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
+	public FieldSignature(@Nonnull CustomModifierSignature[] mods, TypeSignature sig) throws SignatureException
 	{
 		if(sig == null)
 		{

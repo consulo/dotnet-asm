@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
 
 /**
@@ -32,7 +32,7 @@ public class GenericParamDef extends BaseCustomAttributeOwner
 		myConstraints.add(typeDef);
 	}
 
-	@NotNull
+	@Nonnull
 	public List<Object> getConstraints()
 	{
 		return myConstraints;

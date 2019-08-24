@@ -2,7 +2,7 @@ package consulo.internal.dotnet.asm.metadata.genericTable;
 
 import java.util.StringTokenizer;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.BlobHeapEntryReader;
 import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.ByteEntryReader;
 import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.CodeValueEntryReader;
@@ -19,8 +19,8 @@ import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.WordEntryRe
  */
 public class GenericTableDefinition
 {
-	@NotNull
-	public static GenericTableDefinition parse(@NotNull String grammar)
+	@Nonnull
+	public static GenericTableDefinition parse(@Nonnull String grammar)
 	{
 		StringTokenizer outer = new StringTokenizer(grammar, ":");
 		String name = outer.nextToken();
@@ -103,13 +103,13 @@ public class GenericTableDefinition
 		myFieldInfos = fieldInfos;
 	}
 
-	@NotNull
+	@Nonnull
 	public String getName()
 	{
 		return myName;
 	}
 
-	@NotNull
+	@Nonnull
 	public GenericTableFieldInfo[] getFields()
 	{
 		return myFieldInfos;

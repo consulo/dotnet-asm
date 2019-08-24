@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -44,7 +44,7 @@ public class LocalVarList extends StandAloneSignature implements CallingConventi
 	 *
 	 * @param locals an array of LocalVars (can be null. also, any null elements in the array will not be added)
 	 */
-	public LocalVarList(@NotNull LocalVar[] locals)
+	public LocalVarList(@Nonnull LocalVar[] locals)
 	{
 		if(locals.length > 0)
 		{
@@ -106,7 +106,7 @@ public class LocalVarList extends StandAloneSignature implements CallingConventi
 		return localVars.toArray(new LocalVar[localVars.size()]);
 	}
 
-	public void addLocalVar(@NotNull LocalVar v)
+	public void addLocalVar(@Nonnull LocalVar v)
 	{
 		if(localVars.isEmpty())
 		{

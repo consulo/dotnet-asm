@@ -19,7 +19,7 @@ package consulo.internal.dotnet.asm.signature;
 import java.util.List;
 
 import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.mbel.CustomAttribute;
 
 /**
@@ -28,11 +28,11 @@ import consulo.internal.dotnet.asm.mbel.CustomAttribute;
  */
 public interface CustomAttributeOwner
 {
-	void addCustomAttribute(@NotNull CustomAttribute ca);
+	void addCustomAttribute(@Nonnull CustomAttribute ca);
 
 	@Immutable
-	@NotNull
+	@Nonnull
 	List<CustomAttribute> getCustomAttributes();
 
-	void removeCustomAttribute(@NotNull CustomAttribute ca);
+	void removeCustomAttribute(@Nonnull CustomAttribute ca);
 }

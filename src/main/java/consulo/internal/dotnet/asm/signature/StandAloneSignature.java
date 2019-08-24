@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.mbel.CustomAttribute;
 
 /**
@@ -46,7 +46,7 @@ public abstract class StandAloneSignature extends Signature implements CustomAtt
 	 * Adds a CustomAttribute to this MemberRef
 	 */
 	@Override
-	public void addCustomAttribute(@NotNull CustomAttribute ca)
+	public void addCustomAttribute(@Nonnull CustomAttribute ca)
 	{
 		if(myCustomAttributes == Collections.<CustomAttribute>emptyList())
 		{
@@ -58,7 +58,7 @@ public abstract class StandAloneSignature extends Signature implements CustomAtt
 	/**
 	 * Returns a non-null array of the CustomAttributes on this MemberRef
 	 */
-	@NotNull
+	@Nonnull
 	@Override
 	public List<CustomAttribute> getCustomAttributes()
 	{
@@ -69,7 +69,7 @@ public abstract class StandAloneSignature extends Signature implements CustomAtt
 	 * Removes a CustomAttribute from thie MemberRef
 	 */
 	@Override
-	public void removeCustomAttribute(@NotNull CustomAttribute ca)
+	public void removeCustomAttribute(@Nonnull CustomAttribute ca)
 	{
 		myCustomAttributes.remove(ca);
 	}

@@ -20,14 +20,14 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.annotations.Immutable;
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import consulo.annotations.Immutable;
-import org.jetbrains.annotations.NotNull;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class represents a type signature for an SZARRAY (Single-dimensional, Zero-based array)
@@ -55,7 +55,7 @@ public class SZArrayTypeSignature extends TypeSpecSignature
 	 * @param mods an array of CustomModifiers to be applied to this signature
 	 * @param type the TypeSignature of the elements of this array
 	 */
-	public SZArrayTypeSignature(@NotNull CustomModifierSignature[] mods, TypeSignature type) throws SignatureException
+	public SZArrayTypeSignature(@Nonnull CustomModifierSignature[] mods, TypeSignature type) throws SignatureException
 	{
 		super(ELEMENT_TYPE_SZARRAY);
 		if(type == null)
@@ -118,7 +118,7 @@ public class SZArrayTypeSignature extends TypeSpecSignature
 	/**
 	 * Getter method for the CustomModifiers applied to this signature
 	 */
-	@NotNull
+	@Nonnull
 	@Immutable
 	public List<CustomModifierSignature> getCustomMods()
 	{

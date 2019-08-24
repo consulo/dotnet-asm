@@ -6,22 +6,18 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 package consulo.internal.dotnet.asm.mbel;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.io.MSILInputStream;
@@ -30,6 +26,10 @@ import consulo.internal.dotnet.asm.metadata.TableConstants;
 import consulo.internal.dotnet.asm.parse.MSILParseException;
 import consulo.internal.dotnet.asm.parse.PEModule;
 import consulo.internal.dotnet.asm.signature.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This class is all that is needed to parse a Module from a file.
@@ -40,6 +40,8 @@ import consulo.internal.dotnet.asm.signature.*;
  */
 public class ModuleParser extends BaseCustomAttributeOwner
 {
+	public static final int VERSION = 1;
+
 	private PEModule pe_module;
 	private GenericTableValue[][] myTableValues;
 	private TableConstants tc;
@@ -235,7 +237,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	 * It will parse the various structures in the most convenient order possible, all of which
 	 * are either accessible from the Module, or are unimportant and discarded.
 	 */
-	private void parse() throws IOException,  MSILParseException
+	private void parse() throws IOException, MSILParseException
 	{
 		buildAssemblyInfo();
 		buildTypeDefs();
@@ -1008,7 +1010,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		// build InterfaceImpls (after TypeGroup) DONE!
 		if(myTableValues[TableConstants.InterfaceImpl] != null)
 		{
-			GenericTableValue[] 	row = myTableValues[TableConstants.InterfaceImpl];
+			GenericTableValue[] row = myTableValues[TableConstants.InterfaceImpl];
 			interfaceImpls = new InterfaceImplementation[row.length];
 			for(int i = 0; i < row.length; i++)
 			{

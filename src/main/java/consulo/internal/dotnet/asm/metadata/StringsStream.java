@@ -19,9 +19,10 @@
 
 package consulo.internal.dotnet.asm.metadata;
 
-import java.io.IOException;
-
 import consulo.internal.dotnet.asm.io.MSILInputStream;
+import consulo.internal.dotnet.asm.util.StringUtil;
+
+import java.io.IOException;
 
 /**
  * This class represents a stores the #Strings metadata heap.
@@ -58,15 +59,15 @@ public class StringsStream
 	{
 		if(offset < 0 || offset >= raw_bytes.length)
 		{
-			return "";
+			return StringUtil.EMPTY;
 		}
 
-		String result = "";
+		StringBuilder builder = new StringBuilder();
 		for(int i = (int) offset; ((int) raw_bytes[i]) != 0; i++)
 		{
-			result += (char) (raw_bytes[i] & 0xFF);
+			builder.append((char) (raw_bytes[i] & 0xFF));
 		}
-		return result;
+		return builder.toString();
 	}
 
 	/**
@@ -76,20 +77,4 @@ public class StringsStream
 	{
 		return raw_bytes.length;
 	}
-
-/*
-   public void output(){
-      System.out.print("StringsStream[] = {");
-      int current=0;
-      while(current<raw_bytes.length){
-         while(((int)raw_bytes[current])!=0){
-            System.out.print((char)(raw_bytes[current] & 0xFF));
-            current++;
-         }
-         current++;
-         System.out.print("\n");
-      }
-      System.out.print("\n}");
-   }
-*/
 }

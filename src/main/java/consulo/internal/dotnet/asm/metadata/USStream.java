@@ -19,9 +19,9 @@
 
 package consulo.internal.dotnet.asm.metadata;
 
-import java.io.IOException;
-
 import consulo.internal.dotnet.asm.io.MSILInputStream;
+
+import java.io.IOException;
 
 /**
  * This class represents the user string stream in module metadata.
@@ -45,12 +45,6 @@ public class USStream
 		rawbytes = new byte[(int) size];
 		in.read(rawbytes);
 	}
-
-   /*
-   public void output(){
-      System.out.print("#USStream = {}");
-   }
-   */
 
 	/**
 	 * Returns a string from the user string stream, indexed by byte offset
@@ -80,12 +74,12 @@ public class USStream
 			offset++;
 		}
 
-		String result = "";
+		StringBuilder builder = new StringBuilder();
 		for(int i = 0; (i + i) < length - 1; i++)
 		{
-			result += (char) (rawbytes[offset + i + i] | (rawbytes[offset + i + i + 1] << 8));
+			builder.append((char) (rawbytes[offset + i + i] | (rawbytes[offset + i + i + 1] << 8)));
 		}
-		return result;
+		return builder.toString();
 	}
 }
 

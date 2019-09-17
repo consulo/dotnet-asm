@@ -19,10 +19,11 @@
 
 package consulo.internal.dotnet.asm.metadata;
 
-import java.io.IOException;
-
 import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableDefinition;
+import consulo.internal.dotnet.asm.util.StringUtil;
+
+import java.io.IOException;
 
 /**
  * This class contains parsing methods and constants for dealing with metadata tables.
@@ -428,7 +429,7 @@ public class TableConstants
 	{
 		if(strings_stream == null)
 		{
-			return "";
+			return StringUtil.EMPTY;
 		}
 
 		return strings_stream.getStringByOffset(offset);

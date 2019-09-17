@@ -49,7 +49,7 @@ public class GenericTableValue
 	public GenericTableValue(@Nonnull GenericTableDefinition definition)
 	{
 		myTable = definition;
-		myValues = new HashMap<String, Object>(myTable.getFields().length);
+		myValues = new HashMap<>(myTable.getFields().length);
 	}
 
 	/**

@@ -19,9 +19,9 @@
 
 package consulo.internal.dotnet.asm.metadata;
 
-import java.io.IOException;
-
 import consulo.internal.dotnet.asm.io.MSILInputStream;
+
+import java.io.IOException;
 
 /**
  * This class holds the #Blob stream for a .NET module.
@@ -70,18 +70,18 @@ public class BlobStream
 				'E',
 				'F'
 		};
-		String result = "0x";
+		StringBuilder result = new StringBuilder("0x");
 		int temp;
 		for(byte aByte : bytes)
 		{
 			temp = aByte & 0xFF;
-			result += hex[(temp >> 4) & 0xF] + "" + hex[temp & 0xF];
+			result.append(hex[(temp >> 4) & 0xF]).append(hex[temp & 0xF]);
 		}
 		if(bytes.length == 0)
 		{
-			result += '0';
+			result.append('0');
 		}
-		return result;
+		return result.toString();
 	}
 
 	/**

@@ -19,11 +19,11 @@
 
 package consulo.internal.dotnet.asm.io;
 
+import consulo.internal.dotnet.asm.parse.SectionHeader;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-
-import consulo.internal.dotnet.asm.parse.SectionHeader;
 
 /**
  * This is an input stream that buffers the entire PE/COFF file in advance.
@@ -97,13 +97,13 @@ public class MSILInputStream implements Closeable
 	 */
 	public String readASCII() throws IOException
 	{
-		String result = "";
+		StringBuilder builder = new StringBuilder();
 		int BYTE;
 		while((BYTE = readBYTE()) != 0)
 		{
-			result += (char) BYTE;
+			builder.append((char) BYTE);
 		}
-		return result;
+		return builder.toString();
 	}
 
 	/**

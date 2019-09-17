@@ -1,17 +1,11 @@
 package consulo.internal.dotnet.asm.metadata.genericTable;
 
-import java.util.StringTokenizer;
+import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.*;
 
 import javax.annotation.Nonnull;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.BlobHeapEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.ByteEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.CodeValueEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.DWordEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.EntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.GUIDHeapEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.StringsHeapEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.TableValueEntryReader;
-import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.WordEntryReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * @author VISTALL
@@ -29,15 +23,17 @@ public class GenericTableDefinition
 
 		String[] fieldNames = new String[outer.countTokens()];
 		String[] types = new String[fieldNames.length];
+		Map<String, Integer> nameToIndex = new HashMap<>();
 		for(int i = 0; i < fieldNames.length; i++)
 		{
 			String field = outer.nextToken();
 			StringTokenizer fieldtok = new StringTokenizer(field, "=");
 			fieldNames[i] = fieldtok.nextToken();
 			types[i] = fieldtok.nextToken();
+			nameToIndex.put(fieldNames[i], i);
 		}
 
-		StringTokenizer tok = null;
+		StringTokenizer tok;
 
 		GenericTableFieldInfo[] fieldInfos = new GenericTableFieldInfo[fieldNames.length];
 		for(int i = 0; i < fieldNames.length; i++)
@@ -89,18 +85,26 @@ public class GenericTableDefinition
 				throw new IllegalArgumentException("Unsupported type: " + type);
 			}
 
-			fieldInfos[i] = new GenericTableFieldInfo(fieldName, entryReader);
+			fieldInfos[i] = new GenericTableFieldInfo(i, fieldName, entryReader);
 		}
-		return new GenericTableDefinition(name, fieldInfos);
+		return new GenericTableDefinition(name, nameToIndex, fieldInfos);
 	}
 
 	private final String myName;
+	private final Map<String, Integer> myNameToIndex;
 	private final GenericTableFieldInfo[] myFieldInfos;
 
-	public GenericTableDefinition(String name, GenericTableFieldInfo[] fieldInfos)
+	public GenericTableDefinition(String name, @Nonnull Map<String, Integer> nameToIndex, GenericTableFieldInfo[] fieldInfos)
 	{
 		myName = name;
+		myNameToIndex = nameToIndex;
 		myFieldInfos = fieldInfos;
+	}
+
+	@Nonnull
+	public Map<String, Integer> getNameToIndex()
+	{
+		return myNameToIndex;
 	}
 
 	@Nonnull

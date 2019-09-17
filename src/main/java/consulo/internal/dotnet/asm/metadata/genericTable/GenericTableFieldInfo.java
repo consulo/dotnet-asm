@@ -1,7 +1,8 @@
 package consulo.internal.dotnet.asm.metadata.genericTable;
 
-import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.EntryReader;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author VISTALL
@@ -9,13 +10,20 @@ import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.EntryReader
  */
 public class GenericTableFieldInfo
 {
+	private final int myIndex;
 	private final String myName;
 	private final EntryReader myEntryReader;
 
-	public GenericTableFieldInfo(@Nonnull String name, @Nonnull EntryReader entryReader)
+	public GenericTableFieldInfo(int index, @Nonnull String name, @Nonnull EntryReader entryReader)
 	{
+		myIndex = index;
 		myName = name;
 		myEntryReader = entryReader;
+	}
+
+	public int getIndex()
+	{
+		return myIndex;
 	}
 
 	@Nonnull

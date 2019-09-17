@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,14 +19,13 @@
 
 package consulo.internal.dotnet.asm.metadata;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableDefinition;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableFieldInfo;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
 
 /**
  * This class is used as a generic construct to hold the data from any arbitrary metadata table.
@@ -38,18 +37,17 @@ import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableFieldInfo;
 public class GenericTableValue
 {
 	private final GenericTableDefinition myTable;
-	private final Map<String, Object> myValues;
-
+	private final Object[] myValues;
 
 	/**
 	 * Initializes this table with the given grammar.
 	 *
-	 * @param Grammar the grammar string for this table (one of the constants defined in TableConstants.GRAMMAR)
+	 * @param definition the grammar string for this table (one of the constants defined in TableConstants.GRAMMAR)
 	 */
 	public GenericTableValue(@Nonnull GenericTableDefinition definition)
 	{
 		myTable = definition;
-		myValues = new HashMap<>(myTable.getFields().length);
+		myValues = new Object[myTable.getFields().length];
 	}
 
 	/**
@@ -65,7 +63,7 @@ public class GenericTableValue
 
 		for(GenericTableFieldInfo fieldInfo : fields)
 		{
-			myValues.put(fieldInfo.getName(), fieldInfo.getEntryReader().read(in, tc));
+			myValues[fieldInfo.getIndex()] = fieldInfo.getEntryReader().read(in, tc);
 		}
 	}
 
@@ -81,14 +79,21 @@ public class GenericTableValue
 	 * @param fieldName the name of the field (i.e. "Name" or "Namespace")
 	 * @return the string field, or null if invalid
 	 */
-	public String getString(String fieldName)
+	@Nullable
+	public String getString(@Nonnull String fieldName)
 	{
-		if(myValues == null || fieldName == null)
+		if(myValues == null)
 		{
 			return null;
 		}
 
-		Object obj = myValues.get(fieldName);
+		Integer nameIndex = myTable.getNameToIndex().get(fieldName);
+		if(nameIndex == null)
+		{
+			return null;
+		}
+
+		Object obj = myValues[nameIndex];
 		if(obj == null || !(obj instanceof String))
 		{
 			return null;
@@ -105,14 +110,21 @@ public class GenericTableValue
 	 * @param fieldName the name of the field (i.e. "Signature")
 	 * @return a byte array blob
 	 */
-	public byte[] getBlob(String fieldName)
+	@Nullable
+	public byte[] getBlob(@Nonnull String fieldName)
 	{
-		if(myValues == null || fieldName == null)
+		if(myValues == null)
 		{
 			return null;
 		}
 
-		Object obj = myValues.get(fieldName);
+		Integer nameIndex = myTable.getNameToIndex().get(fieldName);
+		if(nameIndex == null)
+		{
+			return null;
+		}
+
+		Object obj = myValues[nameIndex];
 		if(obj == null || !(obj instanceof byte[]))
 		{
 			return null;
@@ -129,7 +141,7 @@ public class GenericTableValue
 	 * @param fieldName the name of the field (i.e. "Mvid")
 	 * @return a byte array GUID
 	 */
-	public byte[] getGUID(String fieldName)
+	public byte[] getGUID(@Nonnull String fieldName)
 	{
 		return getBlob(fieldName);
 	}
@@ -140,14 +152,21 @@ public class GenericTableValue
 	 * @param fieldName the name of this field (i.e. "BuildNumber" or "MajorVersion")
 	 * @return a Number containing the constant value (will either be an Integer or a Long)
 	 */
-	public Number getConstant(String fieldName)
+	@Nullable
+	public Number getConstant(@Nonnull String fieldName)
 	{
-		if(myValues == null || fieldName == null)
+		if(myValues == null)
 		{
 			return null;
 		}
 
-		Object obj = myValues.get(fieldName);
+		Integer nameIndex = myTable.getNameToIndex().get(fieldName);
+		if(nameIndex == null)
+		{
+			return null;
+		}
+
+		Object obj = myValues[nameIndex];
 		if(obj == null || !(obj instanceof Number))
 		{
 			return null;
@@ -164,7 +183,8 @@ public class GenericTableValue
 	 * @param fieldName the name of the field (i.e. "MethodList" or "Parent")
 	 * @return a Long containing a RID
 	 */
-	public Long getTableIndex(String fieldName)
+	@Nullable
+	public Long getTableIndex(@Nonnull String fieldName)
 	{
 		Number temp = getConstant(fieldName);
 		if(temp == null || !(temp instanceof Long))
@@ -183,7 +203,8 @@ public class GenericTableValue
 	 * @param fieldName the name of the field
 	 * @return a Long containing a coded index
 	 */
-	public Long getCodedIndex(String fieldName)
+	@Nullable
+	public Long getCodedIndex(@Nonnull String fieldName)
 	{
 		return getTableIndex(fieldName);
 	}
@@ -201,10 +222,11 @@ public class GenericTableValue
 		{
 			return false;
 		}
+
 		for(GenericTableFieldInfo fieldName : myTable.getFields())
 		{
-			Object obj1 = myValues.get(fieldName.getName());
-			Object obj2 = table.myValues.get(fieldName.getName());
+			Object obj1 = myValues[fieldName.getIndex()];
+			Object obj2 = table.myValues[fieldName.getIndex()];
 			if(obj1 instanceof byte[])
 			{
 				byte[] b1 = (byte[]) obj1;

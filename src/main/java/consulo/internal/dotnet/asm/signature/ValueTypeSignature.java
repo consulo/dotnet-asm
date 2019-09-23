@@ -61,12 +61,12 @@ public class ValueTypeSignature extends TypeSignature
 	 */
 	public static TypeSignature parse(ByteBuffer buffer, TypeGroup group)
 	{
-		ValueTypeSignature blob = new ValueTypeSignature();
 		byte data = buffer.get();
 		if(data != ELEMENT_TYPE_VALUETYPE)
 		{
 			return null;
 		}
+		ValueTypeSignature blob = new ValueTypeSignature();
 
 		int token[] = parseTypeDefOrRefEncoded(buffer);
 		if(token[0] == TableConstants.TypeDef)

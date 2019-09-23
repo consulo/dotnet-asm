@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,6 +30,13 @@ import consulo.internal.dotnet.asm.io.ByteBuffer;
  */
 public abstract class Signature implements SignatureConstants
 {
+	private static final // returns {table, row} tuple
+			int[] ROWS = {
+			0x02,
+			0x01,
+			0x1B
+	};
+
 	/**
 	 * Parses a PackedLen coded integer from the given buffer
 	 *
@@ -72,13 +79,6 @@ public abstract class Signature implements SignatureConstants
 	 */
 	public static int[] parseTypeDefOrRefEncoded(ByteBuffer buffer)
 	{
-		// returns {table, row} tuple
-		int[] ROWS = {
-				0x02,
-				0x01,
-				0x1B
-		};
-
 		int[] token = new int[2];
 		int result = readCodedInteger(buffer);
 

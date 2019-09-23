@@ -20,14 +20,14 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.annotations.Immutable;
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import consulo.annotations.Immutable;
-import javax.annotation.Nonnull;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class describes the type of an mbel field
@@ -82,14 +82,13 @@ public class FieldSignature extends StandAloneSignature implements CallingConven
 	 */
 	public static FieldSignature parse(ByteBuffer buffer, TypeGroup group)
 	{
-		FieldSignature blob = new FieldSignature();
-
 		byte data = buffer.get();
 		if((data & CALL_CONV_MASK) != FIELD)
 		{
 			return null;
 		}
 
+		FieldSignature blob = new FieldSignature();
 		int pos = buffer.getPosition();
 		CustomModifierSignature temp = CustomModifierSignature.parse(buffer, group);
 		while(temp != null)

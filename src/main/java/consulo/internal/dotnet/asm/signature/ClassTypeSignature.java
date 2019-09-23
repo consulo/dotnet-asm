@@ -20,11 +20,12 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.AbstractTypeReference;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 import consulo.internal.dotnet.asm.metadata.TableConstants;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class describes a class type signature
@@ -60,13 +61,13 @@ public class ClassTypeSignature extends TypeSignature
 	 */
 	public static TypeSignature parse(ByteBuffer buffer, TypeGroup group)
 	{
-		ClassTypeSignature blob = new ClassTypeSignature();
 		byte data = buffer.get();
 		if(data != ELEMENT_TYPE_CLASS)
 		{
 			return null;
 		}
 
+		ClassTypeSignature blob = new ClassTypeSignature();
 		int token[] = parseTypeDefOrRefEncoded(buffer);
 		if(token[0] == TableConstants.TypeDef)
 		{

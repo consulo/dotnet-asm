@@ -61,13 +61,13 @@ public class FunctionPointerTypeSignature extends TypeSpecSignature
 	 */
 	public static TypeSignature parse(ByteBuffer buffer, TypeGroup group)
 	{
-		FunctionPointerTypeSignature blob = new FunctionPointerTypeSignature();
 		byte data = buffer.get();
 		if(data != ELEMENT_TYPE_FNPTR)
 		{
 			return null;
 		}
 
+		FunctionPointerTypeSignature blob = new FunctionPointerTypeSignature();
 		blob.methodSig = MethodSignature.parse(buffer, group);
 		if(blob.methodSig == null)
 		{

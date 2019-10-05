@@ -27,6 +27,7 @@ import consulo.internal.dotnet.asm.parse.MSILParseException;
 import consulo.internal.dotnet.asm.parse.PEModule;
 import consulo.internal.dotnet.asm.signature.*;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -41,6 +42,14 @@ import java.util.List;
 public class ModuleParser extends BaseCustomAttributeOwner
 {
 	public static final int VERSION = 1;
+
+	@Nonnull
+	public static AssemblyInfo parseAssemblyInfo(File file) throws IOException, MSILParseException
+	{
+		ModuleParser parser = new ModuleParser(file, false);
+		parser.buildAssemblyInfo();
+		return parser.getAssemblyInfo();
+	}
 
 	private PEModule pe_module;
 	private GenericTableValue[][] myTableValues;
@@ -82,20 +91,19 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	 */
 	public ModuleParser(File file) throws IOException, MSILParseException
 	{
+		this(file, true);
+	}
+
+	private ModuleParser(File file, boolean parse) throws IOException, MSILParseException
+	{
 		in = new MSILInputStream(file);
 		pe_module = new PEModule(in);
 		tc = pe_module.metadata.parseTableConstants(in);
 		myTableValues = tc.getTables();
-		parse();
-	}
-
-	/**
-	 * Returns the MSILInputStream that this parser is using.
-	 * This method is used as a callback in other classes.
-	 */
-	public MSILInputStream getMSILInputStream()
-	{
-		return in;
+		if(parse)
+		{
+			parse();
+		}
 	}
 
 	/**

@@ -46,7 +46,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	@Nonnull
 	public static AssemblyInfo parseAssemblyInfo(File file) throws IOException, MSILParseException
 	{
-		ModuleParser parser = new ModuleParser(file, false);
+		ModuleParser parser = new ModuleParser(file, TableConstants.Assembly);
 		parser.buildAssemblyInfo();
 		return parser.getAssemblyInfo();
 	}
@@ -91,16 +91,16 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	 */
 	public ModuleParser(File file) throws IOException, MSILParseException
 	{
-		this(file, true);
+		this(file, -1);
 	}
 
-	private ModuleParser(File file, boolean parse) throws IOException, MSILParseException
+	private ModuleParser(File file, int tableIndexStop) throws IOException, MSILParseException
 	{
 		in = new MSILInputStream(file);
 		pe_module = new PEModule(in);
-		tc = pe_module.metadata.parseTableConstants(in);
+		tc = pe_module.metadata.parseTableConstants(in, tableIndexStop);
 		myTableValues = tc.getTables();
-		if(parse)
+		if(tableIndexStop == -1)
 		{
 			parse();
 		}

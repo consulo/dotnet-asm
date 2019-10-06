@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -201,10 +201,12 @@ public class TableConstants
 			1,
 			1,
 			1,
-			2,    //Implementation
+			2,
+			//Implementation
 			3,
 			2,
-			1    //TypeOrMethodDef
+			1
+			//TypeOrMethodDef
 	};
 	private static final int[] MASKS = {
 			0x3,
@@ -216,10 +218,12 @@ public class TableConstants
 			0x1,
 			0x1,
 			0x1,
-			0x3,   //Implementation
+			0x3,
+			//Implementation
 			0x7,
 			0x3,
-			0x1    //TypeOrMethodDef
+			0x1
+			//TypeOrMethodDef
 	};
 
 	private int[] INDEX_BITS;
@@ -228,19 +232,19 @@ public class TableConstants
 
 	// coded indexes
 	public static final int[][] TABLE_OPTIONS = {
-   /*TypeDefOrRef*/
+			/*TypeDefOrRef*/
 			{
 					TypeDef,
 					TypeRef,
 					TypeSpec
 			},
-   /*HasConst*/
+			/*HasConst*/
 			{
 					Field,
 					Param,
 					Property
 			},
-   /*HasCustomAttribute*/
+			/*HasCustomAttribute*/
 			{
 					Method,
 					Field,
@@ -263,18 +267,18 @@ public class TableConstants
 					ManifestResource,
 					GenericParam
 			},
-   /*HasFieldMarshal*/
+			/*HasFieldMarshal*/
 			{
 					Field,
 					Param
 			},
-   /*HasDeclSecurity*/
+			/*HasDeclSecurity*/
 			{
 					TypeDef,
 					Method,
 					Assembly
 			},
-   /*MemberRefParent*/
+			/*MemberRefParent*/
 			{
 					TypeDef,
 					TypeRef,
@@ -282,28 +286,28 @@ public class TableConstants
 					Method,
 					TypeSpec
 			},
-   /*HasSemantics*/
+			/*HasSemantics*/
 			{
 					Event,
 					Property
 			},
-   /*MethodDefOrRef*/
+			/*MethodDefOrRef*/
 			{
 					Method,
 					MemberRef
 			},
-   /*MemberForwarded*/
+			/*MemberForwarded*/
 			{
 					Field,
 					Method
 			},
-   /*Implementation*/
+			/*Implementation*/
 			{
 					File,
 					AssemblyRef,
 					ExportedType
 			},
-   /*CustomAttributeType*/
+			/*CustomAttributeType*/
 			{
 					TypeRef,
 					TypeDef,
@@ -311,14 +315,14 @@ public class TableConstants
 					MemberRef
 			},
 			//, USString},
-   /*ResolutionScope*/
+			/*ResolutionScope*/
 			{
 					Module,
 					ModuleRef,
 					AssemblyRef,
 					TypeRef
 			},
-	/*TypeOrMethodDef*/
+			/*TypeOrMethodDef*/
 			{
 					TypeDef,
 					Method
@@ -336,11 +340,11 @@ public class TableConstants
 	/**
 	 * Makes a TableConstants with the given table sizes, heap sizes, and streams
 	 *
-	 * @param compS   the #~ stream
+	 * @param compS    the #~ stream
 	 * @param stringsS the #Strings heap
-	 * @param blobS   the #Blob heap
-	 * @param guidS   the #GUID heap
-	 * @param usS     the #US stream
+	 * @param blobS    the #Blob heap
+	 * @param guidS    the #GUID heap
+	 * @param usS      the #US stream
 	 */
 	public TableConstants(CompressedStream compS, StringsStream stringsS, BlobStream blobS, GUIDStream guidS, USStream usS)
 	{
@@ -385,27 +389,35 @@ public class TableConstants
 	/**
 	 * This method parses the metadata tables from the given input stream
 	 *
-	 * @param in the input stream to read from
+	 * @param in             the input stream to read from
+	 * @param tableIndexStop
 	 */
-	public void parseTables(MSILInputStream in) throws IOException
+	public void parseTables(MSILInputStream in, int tableIndexStop) throws IOException
 	{
 		tables = new GenericTableValue[64][];
 
 		for(int i = 0; i < 64; i++)
 		{
+			GenericTableDefinition grammar = GENERIC_TABLE_DEFINITIONS[i];
+
 			if(c_stream.Counts[i] > 0)
 			{ // if table is present
 				tables[i] = new GenericTableValue[(int) c_stream.Counts[i]];
 				for(int j = 0; j < c_stream.Counts[i]; j++)
 				{
-					GenericTableDefinition grammar = GENERIC_TABLE_DEFINITIONS[i];
 					if(grammar == null)
 					{
 						throw new IllegalArgumentException(i + " is bad index for grammar");
 					}
+
 					tables[i][j] = new GenericTableValue(grammar);
 					tables[i][j].parse(in, this);
 				}
+			}
+
+			if(tableIndexStop != -1 && tableIndexStop == i)
+			{
+				break;
 			}
 		}
 	}

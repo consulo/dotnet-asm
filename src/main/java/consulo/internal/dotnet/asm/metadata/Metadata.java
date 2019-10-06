@@ -19,11 +19,11 @@
 
 package consulo.internal.dotnet.asm.metadata;
 
-import java.io.IOException;
-
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.parse.MSILParseException;
+
+import java.io.IOException;
 
 /**
  * This class contains the raw form of the metadata in a .NET module.
@@ -134,8 +134,7 @@ public class Metadata
 	/**
 	 * Parses the metadata tables and streams, and returns them in a TableConstant object.
 	 */
-	public TableConstants parseTableConstants(MSILInputStream in) throws IOException,
-			MSILParseException
+	public TableConstants parseTableConstants(MSILInputStream in, int tableIndexStop) throws IOException, MSILParseException
 	{
 		StringsStream strings_stream = null;
 		BlobStream blob_stream = null;
@@ -195,7 +194,7 @@ public class Metadata
 
 		TableConstants tc = new TableConstants(c_stream, strings_stream, blob_stream, guid_stream, us_stream);
 		in.seek(c_stream.tableStartFP);
-		tc.parseTables(in);
+		tc.parseTables(in, tableIndexStop);
 		return tc;
 	}
 

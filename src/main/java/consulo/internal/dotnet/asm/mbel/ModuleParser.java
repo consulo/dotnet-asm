@@ -28,6 +28,7 @@ import consulo.internal.dotnet.asm.parse.PEModule;
 import consulo.internal.dotnet.asm.signature.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -41,6 +42,13 @@ import java.util.List;
  */
 public class ModuleParser extends BaseCustomAttributeOwner
 {
+	private static class TypeDefTempInfo
+	{
+		long FieldList;
+		long MethodList;
+		long Extends;
+	}
+
 	public static final int VERSION = 1;
 
 	@Nonnull
@@ -52,12 +60,13 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	}
 
 	private PEModule pe_module;
-	private GenericTableValue[][] myTableValues;
+	private GenericTableValues myTableValues;
 	private TableConstants tc;
 
 	private MSILInputStream in;
 	/////////////////////////////////////////////
 	private TypeDef[] typeDefs = null;
+
 	private TypeRef[] typeRefs = null;
 	private TypeSpec[] typeSpecs = null;
 	private MethodDef[] methods = null;
@@ -247,8 +256,11 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	 */
 	private void parse() throws IOException, MSILParseException
 	{
+		// FIXME [VISTALL] drop unused
+		myTableValues.getAndDrop(TableConstants.MethodSpec);
+
 		buildAssemblyInfo();
-		buildTypeDefs();
+		TypeDefTempInfo[] typeDefTempInfos = buildTypeDefs();
 		setNestedClasses();
 
 		buildModule();
@@ -261,7 +273,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 		buildTypeRefs();
 		buildTypeSpecs();
-		setSuperClasses();
+		setSuperClasses(typeDefTempInfos);
 
 		group = new TypeGroup(typeDefs, typeRefs, typeSpecs);
 
@@ -270,15 +282,15 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		buildFields();
 		setFieldLayouts();
 		setFieldRVAs();
-		if(myTableValues[TableConstants.Param] != null)
+		if(myTableValues.get(TableConstants.Param) != null)
 		{
-			params = new ParameterInfo[myTableValues[TableConstants.Param].length];
+			params = new ParameterInfo[myTableValues.get(TableConstants.Param).length];
 		}
 		buildMethods();
 		setImplMaps();
 		setDeclSecurity();
 
-		setFieldsAndMethods();
+		setFieldsAndMethods(typeDefTempInfos);
 
 		buildProperties();
 		setPropertyMaps();
@@ -295,8 +307,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		buildEntryPoint();
 		buildStandAloneSigs();
 
-		setCustomAttributes();
+		setMethodMaps();
 
+		setCustomAttributes();
 
 		pe_module.bufferSections(in);
 		myTableValues = null;
@@ -307,9 +320,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private long getMethod(long token)
 	{
 		// maps tokens through MethodPtrs, if necessary
-		if(myTableValues[TableConstants.MethodPtr] != null)
+		if(myTableValues.get(TableConstants.MethodPtr) != null)
 		{
-			return myTableValues[TableConstants.MethodPtr][(int) token - 1].getTableIndex("Method");
+			return myTableValues.get(TableConstants.MethodPtr)[(int) token - 1].getTableIndex("Method");
 		}
 		else
 		{
@@ -319,9 +332,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getField(long token)
 	{
-		if(myTableValues[TableConstants.FieldPtr] != null)
+		if(myTableValues.get(TableConstants.FieldPtr) != null)
 		{
-			return myTableValues[TableConstants.FieldPtr][(int) token - 1].getTableIndex("Field");
+			return myTableValues.get(TableConstants.FieldPtr)[(int) token - 1].getTableIndex("Field");
 		}
 		else
 		{
@@ -331,9 +344,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getEvent(long token)
 	{
-		if(myTableValues[TableConstants.EventPtr] != null)
+		if(myTableValues.get(TableConstants.EventPtr) != null)
 		{
-			return myTableValues[TableConstants.EventPtr][(int) token - 1].getTableIndex("Event");
+			return myTableValues.get(TableConstants.EventPtr)[(int) token - 1].getTableIndex("Event");
 		}
 		else
 		{
@@ -343,9 +356,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getParam(long token)
 	{
-		if(myTableValues[TableConstants.ParamPtr] != null)
+		if(myTableValues.get(TableConstants.ParamPtr) != null)
 		{
-			return myTableValues[TableConstants.ParamPtr][(int) token - 1].getTableIndex("Param");
+			return myTableValues.get(TableConstants.ParamPtr)[(int) token - 1].getTableIndex("Param");
 		}
 		else
 		{
@@ -355,9 +368,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private long getProperty(long token)
 	{
-		if(myTableValues[TableConstants.PropertyPtr] != null)
+		if(myTableValues.get(TableConstants.PropertyPtr) != null)
 		{
-			return myTableValues[TableConstants.PropertyPtr][(int) token - 1].getTableIndex("Property");
+			return myTableValues.get(TableConstants.PropertyPtr)[(int) token - 1].getTableIndex("Property");
 		}
 		else
 		{
@@ -370,79 +383,89 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildAssemblyInfo()
 	{
 		// build Assembly table (after Module) DONE!
-		if(myTableValues[TableConstants.Assembly] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Assembly);
+		if(row == null)
 		{
-			GenericTableValue ass = myTableValues[TableConstants.Assembly][0];
-
-			long hash = ass.getConstant("HashAlgID").longValue();
-			int maj = ass.getConstant("MajorVersion").intValue();
-			int min = ass.getConstant("MinorVersion").intValue();
-			int bn = ass.getConstant("BuildNumber").intValue();
-			int rn = ass.getConstant("RevisionNumber").intValue();
-			String name = ass.getString("Name");
-			String culture = ass.getString("Culture");
-			byte[] publicKey = ass.getBlob("PublicKey");
-			long flags = ass.getConstant("Flags").longValue();
-
-			assemblyInfo = new AssemblyInfo(hash, maj, min, bn, rn, flags, publicKey, name, culture);
+			return;
 		}
+
+		GenericTableValue ass = row[0];
+
+		long hash = ass.getConstant("HashAlgID").longValue();
+		int maj = ass.getConstant("MajorVersion").intValue();
+		int min = ass.getConstant("MinorVersion").intValue();
+		int bn = ass.getConstant("BuildNumber").intValue();
+		int rn = ass.getConstant("RevisionNumber").intValue();
+		String name = ass.getString("Name");
+		String culture = ass.getString("Culture");
+		byte[] publicKey = ass.getBlob("PublicKey");
+		long flags = ass.getConstant("Flags").longValue();
+
+		assemblyInfo = new AssemblyInfo(hash, maj, min, bn, rn, flags, publicKey, name, culture);
 	}
 
 	private void buildAssemblyRefs()
 	{
 		// build AssemblyRef table DONE!
-		if(myTableValues[TableConstants.AssemblyRef] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.AssemblyRef);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.AssemblyRef];
-			assemblyRefs = new AssemblyRefInfo[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				int Maj = row[i].getConstant("MajorVersion").intValue();
-				int Min = row[i].getConstant("MinorVersion").intValue();
-				int BN = row[i].getConstant("BuildNumber").intValue();
-				int RN = row[i].getConstant("RevisionNumber").intValue();
-				long flags = row[i].getConstant("Flags").longValue();
-				byte[] pb = row[i].getBlob("PublicKeyOrToken");
-				String name = row[i].getString("Name");
-				String cult = row[i].getString("Culture");
-				byte[] hash = row[i].getBlob("HashValue");
+			return;
+		}
 
-				assemblyRefs[i] = new AssemblyRefInfo(Maj, Min, BN, RN, flags, pb, name, cult, hash);
-			}
+		assemblyRefs = new AssemblyRefInfo[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			int Maj = row[i].getConstant("MajorVersion").intValue();
+			int Min = row[i].getConstant("MinorVersion").intValue();
+			int BN = row[i].getConstant("BuildNumber").intValue();
+			int RN = row[i].getConstant("RevisionNumber").intValue();
+			long flags = row[i].getConstant("Flags").longValue();
+			byte[] pb = row[i].getBlob("PublicKeyOrToken");
+			String name = row[i].getString("Name");
+			String cult = row[i].getString("Culture");
+			byte[] hash = row[i].getBlob("HashValue");
+
+			assemblyRefs[i] = new AssemblyRefInfo(Maj, Min, BN, RN, flags, pb, name, cult, hash);
 		}
 	}
 
 	private void buildModule()
 	{
 		// build Module (after Assembly) DONE!
-		if(myTableValues[TableConstants.Module] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Module);
+		if(row == null)
 		{
-			GenericTableValue mod = myTableValues[TableConstants.Module][0];
-			String name = mod.getString("Name");
-			int generation = mod.getConstant("Generation").intValue();
-			byte[] mvid = mod.getGUID("Mvid");
-			byte[] encid = mod.getGUID("EncID");
-			byte[] encbaseid = mod.getGUID("EncBaseID");
-
-			Generation = generation;
-			Mvid = mvid;
-			EncID = encid;
-			EncBaseID = encbaseid;
+			return;
 		}
+
+		GenericTableValue mod = row[0];
+		String name = mod.getString("Name");
+		int generation = mod.getConstant("Generation").intValue();
+		byte[] mvid = mod.getGUID("Mvid");
+		byte[] encid = mod.getGUID("EncID");
+		byte[] encbaseid = mod.getGUID("EncBaseID");
+
+		Generation = generation;
+		Mvid = mvid;
+		EncID = encid;
+		EncBaseID = encbaseid;
 	}
 
 	private void buildModuleRefs()
 	{
 		// build ModuleRef tables DONE!
-		if(myTableValues[TableConstants.ModuleRef] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.ModuleRef);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.ModuleRef];
-			moduleRefs = new ModuleRefInfo[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				String modName = row[i].getString("Name");
-				moduleRefs[i] = new ModuleRefInfo(modName);
-			}
+			return;
+		}
+
+		moduleRefs = new ModuleRefInfo[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			String modName = row[i].getString("Name");
+			moduleRefs[i] = new ModuleRefInfo(modName);
 		}
 	}
 
@@ -466,60 +489,64 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildFileReferences()
 	{
 		// build Files DONE!
-		GenericTableValue[] table = myTableValues[TableConstants.File];
-		if(table != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.File);
+		if(row == null)
 		{
-			fileReferences = new FileReference[table.length];
-			for(int i = 0; i < table.length; i++)
-			{
-				long flags = table[i].getConstant("Flags").longValue();
-				String name = table[i].getString("Name");
-				byte[] hashValue = table[i].getBlob("HashValue");
+			return;
+		}
 
-				fileReferences[i] = new FileReference(flags, name, hashValue);
-			}
+		fileReferences = new FileReference[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			long flags = row[i].getConstant("Flags").longValue();
+			String name = row[i].getString("Name");
+			byte[] hashValue = row[i].getBlob("HashValue");
+
+			fileReferences[i] = new FileReference(flags, name, hashValue);
 		}
 	}
 
 	private void buildManifestResources() throws IOException
 	{
 		// build ManifestResources (after FileReferences) DONE!
-		if(myTableValues[TableConstants.ManifestResource] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.ManifestResource);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.ManifestResource];
-			mresources = new ManifestResource[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				long coded = row[i].getCodedIndex("Implementation");
-				String name = row[i].getString("Name");
-				long flags = row[i].getConstant("Flags").longValue();
+			return;
+		}
 
-				if(coded == 0)
+		mresources = new ManifestResource[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			long coded = row[i].getCodedIndex("Implementation");
+			String name = row[i].getString("Name");
+			long flags = row[i].getConstant("Flags").longValue();
+
+			if(coded == 0)
+			{
+				// LocalManifestResource
+				long RVA = pe_module.cliHeader.Resources.VirtualAddress;
+				long fp = in.getFilePointer(RVA);
+				fp += row[i].getConstant("Offset").longValue();
+				in.seek(fp);
+				long size = in.readDWORD();
+				byte[] data = new byte[(int) size];
+				in.read(data);
+				mresources[i] = new LocalManifestResource(name, flags, data);
+			}
+			else
+			{
+				long token[] = tc.parseCodedIndex(coded, TableConstants.Implementation);
+				if(token[0] == TableConstants.File)
 				{
-					// LocalManifestResource
-					long RVA = pe_module.cliHeader.Resources.VirtualAddress;
-					long fp = in.getFilePointer(RVA);
-					fp += row[i].getConstant("Offset").longValue();
-					in.seek(fp);
-					long size = in.readDWORD();
-					byte[] data = new byte[(int) size];
-					in.read(data);
-					mresources[i] = new LocalManifestResource(name, flags, data);
+					// FileManifestResource
+					mresources[i] = new FileManifestResource(fileReferences[(int) token[1] - 1], flags);
 				}
-				else
+				else if(token[0] == TableConstants.AssemblyRef)
 				{
-					long token[] = tc.parseCodedIndex(coded, TableConstants.Implementation);
-					if(token[0] == TableConstants.File)
-					{
-						// FileManifestResource
-						mresources[i] = new FileManifestResource(fileReferences[(int) token[1] - 1], flags);
-					}
-					else if(token[0] == TableConstants.AssemblyRef)
-					{
-						// AssemblyManifestResource
-						AssemblyManifestResource res = new AssemblyManifestResource(name, flags, assemblyRefs[(int) token[1] - 1]);
-						mresources[i] = res;
-					}
+					// AssemblyManifestResource
+					AssemblyManifestResource res = new AssemblyManifestResource(name, flags, assemblyRefs[(int) token[1] - 1]);
+					mresources[i] = res;
 				}
 			}
 		}
@@ -528,42 +555,44 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildExportedTypes()
 	{
 		// build ExportedTypes (after File) DONE!
-		GenericTableValue[] table = myTableValues[TableConstants.ExportedType];
-		if(table != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.ExportedType);
+		if(row == null)
 		{
-			exportedTypes = new ExportedTypeRef[table.length];
-			for(int i = 0; i < table.length; i++)
-			{
-				String ns = table[i].getString("TypeNamespace");
-				String name = table[i].getString("TypeName");
-				long flags = table[i].getConstant("Flags").longValue();
+			return;
+		}
 
-				exportedTypes[i] = new ExportedTypeRef(ns, name, flags);
-				if(assemblyInfo != null)
-				{
-					assemblyInfo.addExportedType(exportedTypes[i]);
-				}
-			}
-			for(int i = 0; i < table.length; i++)
+		exportedTypes = new ExportedTypeRef[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			String ns = row[i].getString("TypeNamespace");
+			String name = row[i].getString("TypeName");
+			long flags = row[i].getConstant("Flags").longValue();
+
+			exportedTypes[i] = new ExportedTypeRef(ns, name, flags);
+			if(assemblyInfo != null)
 			{
-				long coded = table[i].getCodedIndex("Implementation");
-				long[] token = tc.parseCodedIndex(coded, TableConstants.Implementation);
-				if(token[0] == TableConstants.ExportedType)
-				{
-					exportedTypes[i].setExportedTypeRef(getByLongIndex(exportedTypes, token[1]));
-				}
-				else if(token[0] == TableConstants.File)
-				{
-					exportedTypes[i].setFileReference(getByLongIndex(fileReferences, token[1]));
-				}
-				else if(token[0] == TableConstants.AssemblyRef)
-				{
-					exportedTypes[i].setAssemblyRefInfo(getByLongIndex(assemblyRefs, token[1]));
-				}
-				else
-				{
-					throw new IllegalArgumentException();
-				}
+				assemblyInfo.addExportedType(exportedTypes[i]);
+			}
+		}
+		for(int i = 0; i < row.length; i++)
+		{
+			long coded = row[i].getCodedIndex("Implementation");
+			long[] token = tc.parseCodedIndex(coded, TableConstants.Implementation);
+			if(token[0] == TableConstants.ExportedType)
+			{
+				exportedTypes[i].setExportedTypeRef(getByLongIndex(exportedTypes, token[1]));
+			}
+			else if(token[0] == TableConstants.File)
+			{
+				exportedTypes[i].setFileReference(getByLongIndex(fileReferences, token[1]));
+			}
+			else if(token[0] == TableConstants.AssemblyRef)
+			{
+				exportedTypes[i].setAssemblyRefInfo(getByLongIndex(assemblyRefs, token[1]));
+			}
+			else
+			{
+				throw new IllegalArgumentException();
 			}
 		}
 	}
@@ -571,97 +600,101 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void buildFields()
 	{
 		// build Fields (after TypeGroup) DONE!
-		if(myTableValues[TableConstants.Field] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Field);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.Field];
-			fields = new Field[myTableValues[TableConstants.Field].length];
-			for(int i = 0; i < row.length; i++)
-			{
-				int Flags = row[i].getConstant("Flags").intValue();
-				String name = row[i].getString("Name");
-				byte[] blob = row[i].getBlob("Signature");
-				FieldSignature sig = FieldSignature.parse(new ByteBuffer(blob),
-						group);
-				fields[i] = new Field(name, sig);
-				fields[i].setFlags(Flags);
-				// does not set parent!
-			}
-			// decorate with FieldLayout, FieldMarshal, FieldRVA
+			return;
+		}
+
+		fields = new Field[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			int Flags = row[i].getConstant("Flags").intValue();
+			String name = row[i].getString("Name");
+			byte[] blob = row[i].getBlob("Signature");
+			FieldSignature sig = FieldSignature.parse(new ByteBuffer(blob),
+					group);
+			fields[i] = new Field(name, sig);
+			fields[i].setFlags(Flags);
+			// does not set parent!
 		}
 	}
 
 	private void setFieldLayouts()
 	{
 		// build FieldLayouts (after Fields) DONE!
-		if(myTableValues[TableConstants.FieldLayout] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.FieldLayout);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.FieldLayout];
-			for(GenericTableValue aRow : row)
-			{
-				long field = getField(aRow.getTableIndex("Field"));
-				long Offset = aRow.getConstant("Offset").longValue();
-				fields[(int) field - 1].setOffset(Offset);
-			}
+			return;
+		}
+
+		for(GenericTableValue aRow : row)
+		{
+			long field = getField(aRow.getTableIndex("Field"));
+			long Offset = aRow.getConstant("Offset").longValue();
+			fields[(int) field - 1].setOffset(Offset);
 		}
 	}
 
 	private void buildMethods()
 	{
 		// build Methods (after Params and TypeGroup)
-		GenericTableValue[] row = myTableValues[TableConstants.Method];
-		if(row != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Method);
+		if(row == null)
 		{
-			methods = new MethodDef[row.length];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		methods = new MethodDef[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			long RVA = row[i].getConstant("RVA").longValue();
+			String name = row[i].getString("Name");
+			int implFlags = row[i].getConstant("ImplFlags").intValue();
+			int flags = row[i].getConstant("Flags").intValue();
+			byte[] blob = row[i].getBlob("Signature");
+
+			MethodSignature sig = MethodSignature.parse(new ByteBuffer(blob), group);
+
+			methods[i] = new MethodDef(name, implFlags, flags, sig);
+
+			if((RVA != 0) && (implFlags & MethodDef.CodeTypeMask) == MethodDef.Native)
 			{
-				long RVA = row[i].getConstant("RVA").longValue();
-				String name = row[i].getString("Name");
-				int implFlags = row[i].getConstant("ImplFlags").intValue();
-				int flags = row[i].getConstant("Flags").intValue();
-				byte[] blob = row[i].getBlob("Signature");
-
-				MethodSignature sig = MethodSignature.parse(new ByteBuffer(blob)
-						, group);
-
-				methods[i] = new MethodDef(name, implFlags, flags, sig);
-
-				if((RVA != 0) && (implFlags & MethodDef.CodeTypeMask) == MethodDef.Native)
-				{
-					methods[i].setMethodRVA(RVA);
-				}
+				methods[i].setMethodRVA(RVA);
 			}
+		}
 
-			// add params DONE!
-			for(int i = 0; i < row.length; i++)
+		// add params DONE!
+		for(int i = 0; i < row.length; i++)
+		{
+			List<ParameterSignature> pSigs = methods[i].getSignature().getParameters();
+
+			long startI = row[i].getTableIndex("ParamList");
+			if(!(startI == 0 || myTableValues.get(TableConstants.Param) == null || startI > myTableValues.get(TableConstants.Param).length))
 			{
-				List<ParameterSignature> pSigs = methods[i].getSignature().getParameters();
-
-				long startI = row[i].getTableIndex("ParamList");
-				if(!(startI == 0 || myTableValues[TableConstants.Param] == null || startI > myTableValues[TableConstants.Param].length))
+				// valid start of paramlist
+				long endI = myTableValues.get(TableConstants.Param).length + 1;
+				if(i < row.length - 1)
 				{
-					// valid start of paramlist
-					long endI = myTableValues[TableConstants.Param].length + 1;
-					if(i < row.length - 1)
-					{
-						endI = Math.min(endI, row[i + 1].getTableIndex("ParamList").longValue());
-					}
+					endI = Math.min(endI, row[i + 1].getTableIndex("ParamList").longValue());
+				}
 
-					for(long j = startI; j < endI; j++)
+				for(long j = startI; j < endI; j++)
+				{
+					GenericTableValue paramTable = myTableValues.get(TableConstants.Param)[(int) getParam(j) - 1];
+					int flags = paramTable.getConstant("Flags").intValue();
+					int seq = paramTable.getConstant("Sequence").intValue();
+					String name = paramTable.getString("Name");
+					if(seq == 0)
 					{
-						GenericTableValue paramTable = myTableValues[TableConstants.Param][(int) getParam(j) - 1];
-						int flags = paramTable.getConstant("Flags").intValue();
-						int seq = paramTable.getConstant("Sequence").intValue();
-						String name = paramTable.getString("Name");
-						if(seq == 0)
-						{
-							params[(int) getParam(j) - 1] = new ParameterInfo(name, flags);
-							methods[i].getSignature().getReturnType().setParameterInfo(params[(int) getParam(j) - 1]);
-						}
-						else
-						{
-							params[(int) getParam(j) - 1] = new ParameterInfo(name, flags);
-							pSigs.get(seq - 1).setParameterInfo(params[(int) getParam(j) - 1]);
-						}
+						params[(int) getParam(j) - 1] = new ParameterInfo(name, flags);
+						methods[i].getSignature().getReturnType().setParameterInfo(params[(int) getParam(j) - 1]);
+					}
+					else
+					{
+						params[(int) getParam(j) - 1] = new ParameterInfo(name, flags);
+						pSigs.get(seq - 1).setParameterInfo(params[(int) getParam(j) - 1]);
 					}
 				}
 			}
@@ -671,117 +704,132 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private void setImplMaps()
 	{
 		// build ImplMaps (after Methods) DONE!
-		if(myTableValues[TableConstants.ImplMap] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.ImplMap);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.ImplMap];
-			for(GenericTableValue aRow : row)
+			return;
+		}
+
+		for(GenericTableValue aRow : row)
+		{
+			long coded = aRow.getCodedIndex("MemberForwarded");
+			long token[] = tc.parseCodedIndex(coded, TableConstants.MemberForwarded);
+			if(token[0] != TableConstants.Method)
 			{
-				long coded = aRow.getCodedIndex("MemberForwarded");
-				long token[] = tc.parseCodedIndex(coded, TableConstants.MemberForwarded);
-				if(token[0] != TableConstants.Method)
-				{
-					continue;
-				}
-				long method = getMethod(token[1]);
-
-				int flags = aRow.getConstant("MappingFlags").intValue();
-				String name = aRow.getString("ImportName");
-				long modref = aRow.getTableIndex("ImportScope");
-
-				methods[(int) method - 1].setImplementationMap(new ImplementationMap(flags, name, moduleRefs[(int) modref - 1]));
+				continue;
 			}
+			long method = getMethod(token[1]);
+
+			int flags = aRow.getConstant("MappingFlags").intValue();
+			String name = aRow.getString("ImportName");
+			long modref = aRow.getTableIndex("ImportScope");
+
+			methods[(int) method - 1].setImplementationMap(new ImplementationMap(flags, name, moduleRefs[(int) modref - 1]));
 		}
 	}
 
 	private void setDeclSecurity()
 	{
 		// build DeclSecurity (after Assembly, Method, and TypeDefs) DONE!
-		if(myTableValues[TableConstants.DeclSecurity] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.DeclSecurity);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.DeclSecurity];
-			declSecurities = new DeclSecurity[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				long coded = row[i].getCodedIndex("Parent");
-				long token[] = tc.parseCodedIndex(coded, TableConstants.HasDeclSecurity);
-				int Action = row[i].getConstant("Action").intValue();
-				byte[] permission = row[i].getBlob("PermissionSet");
-				declSecurities[i] = new DeclSecurity(Action, permission);
+			return;
+		}
 
-				if(token[0] == TableConstants.TypeDef)
-				{
-					typeDefs[(int) token[1] - 1].setDeclSecurity(declSecurities[i]);
-				}
-				else if(token[0] == TableConstants.Method)
-				{
-					methods[(int) getMethod(token[1]) - 1].setDeclSecurity(declSecurities[i]);
-				}
-				else if(token[0] == TableConstants.Assembly)
-				{
-					assemblyInfo.setDeclSecurity(declSecurities[i]);
-				}
+		declSecurities = new DeclSecurity[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			long coded = row[i].getCodedIndex("Parent");
+			long token[] = tc.parseCodedIndex(coded, TableConstants.HasDeclSecurity);
+			int Action = row[i].getConstant("Action").intValue();
+			byte[] permission = row[i].getBlob("PermissionSet");
+			declSecurities[i] = new DeclSecurity(Action, permission);
+
+			if(token[0] == TableConstants.TypeDef)
+			{
+				typeDefs[(int) token[1] - 1].setDeclSecurity(declSecurities[i]);
+			}
+			else if(token[0] == TableConstants.Method)
+			{
+				methods[(int) getMethod(token[1]) - 1].setDeclSecurity(declSecurities[i]);
+			}
+			else if(token[0] == TableConstants.Assembly)
+			{
+				assemblyInfo.setDeclSecurity(declSecurities[i]);
 			}
 		}
 	}
 
-
-	private void buildTypeDefs()
+	@Nullable
+	private TypeDefTempInfo[] buildTypeDefs()
 	{
 		// build TypeDefs (after Field and Methods) DONE!
-		if(myTableValues[TableConstants.TypeDef] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.TypeDef);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.TypeDef];
-			typeDefs = new TypeDef[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				String name = row[i].getString("Name");
-				String ns = row[i].getString("Namespace");
-				long flags = row[i].getConstant("Flags").longValue();
-
-				typeDefs[i] = new TypeDef(ns, name, flags);
-			}
+			return null;
 		}
+
+		TypeDefTempInfo[] tempInfos = new TypeDefTempInfo[row.length];
+
+		typeDefs = new TypeDef[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			String name = row[i].getString("Name");
+			String ns = row[i].getString("Namespace");
+			long flags = row[i].getConstant("Flags").longValue();
+
+			typeDefs[i] = new TypeDef(ns, name, flags);
+
+			TypeDefTempInfo tempInfo = new TypeDefTempInfo();
+			tempInfo.FieldList = row[i].getTableIndex("FieldList");
+			tempInfo.MethodList = row[i].getTableIndex("MethodList");
+			tempInfo.Extends = row[i].getTableIndex("Extends");
+
+			tempInfos[i] = tempInfo;
+		}
+
+		return tempInfos;
 	}
 
-	private void setFieldsAndMethods()
+	private void setFieldsAndMethods(@Nullable TypeDefTempInfo[] typeDefTempInfos)
 	{
-		// set parents of the fields and methods (after Typedef, Method, Field) DONE!
-		if(myTableValues[TableConstants.TypeDef] != null)
+		if(typeDefTempInfos == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.TypeDef];
+			return;
+		}
 
-			for(int i = 0; i < row.length; i++)
+		for(int i = 0; i < typeDefTempInfos.length; i++)
+		{
+			long fieldS = typeDefTempInfos[i].FieldList;
+			if(!(fieldS == 0 || fields == null || fieldS > fields.length))
 			{
-				long fieldS = row[i].getTableIndex("FieldList");
-				if(!(fieldS == 0 || myTableValues[TableConstants.Field] == null || fieldS > myTableValues[TableConstants.Field].length))
+				long fieldE = fields.length + 1;
+				if(i < typeDefTempInfos.length - 1)
 				{
-					long fieldE = fields.length + 1;
-					if(i < row.length - 1)
-					{
-						fieldE = Math.min(fieldE, row[i + 1].getTableIndex("FieldList").longValue());
-					}
-
-					for(long j = fieldS; j < fieldE; j++)
-					{
-						typeDefs[i].addField(fields[(int) getField(j) - 1]);
-					}
-					// this sets the field parents
+					fieldE = Math.min(fieldE, typeDefTempInfos[i + 1].FieldList);
 				}
 
-				long methodS = row[i].getTableIndex("MethodList");
-				if(!(methodS == 0 || myTableValues[TableConstants.Method] == null || methodS > myTableValues[TableConstants.Method].length))
+				for(long j = fieldS; j < fieldE; j++)
 				{
-					long methodE = methods.length + 1;
-					if(i < row.length - 1)
-					{
-						methodE = Math.min(methodE, row[i + 1].getTableIndex("MethodList").longValue());
-					}
+					typeDefs[i].addField(fields[(int) getField(j) - 1]);
+				}
+				// this sets the field parents
+			}
 
-					for(long j = methodS; j < methodE; j++)
-					{
-						typeDefs[i].addMethod(methods[(int) getMethod(j) - 1]);
-					}
-					// this sets the method parents
+			long methodS = typeDefTempInfos[i].MethodList;
+			if(!(methodS == 0 || methods == null || methodS > methods.length))
+			{
+				long methodE = methods.length + 1;
+				if(i < typeDefTempInfos.length - 1)
+				{
+					methodE = Math.min(methodE, typeDefTempInfos[i + 1].MethodList);
+				}
+
+				for(long j = methodS; j < methodE; j++)
+				{
+					typeDefs[i].addMethod(methods[(int) getMethod(j) - 1]);
 				}
 			}
 		}
@@ -789,131 +837,133 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void buildTypeRefs()
 	{
-		// build TypeRefs (after TypeDefs and ExportedTypes) DONE!
-		if(myTableValues[TableConstants.TypeRef] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.TypeRef);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.TypeRef];
-			typeRefs = new TypeRef[row.length];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		typeRefs = new TypeRef[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			long coded = row[i].getCodedIndex("ResolutionScope");
+
+			if(coded == 0L)
 			{
-				long coded = row[i].getCodedIndex("ResolutionScope");
-
-				if(coded == 0L)
-				{
-					// ExportedType
-					String Name = row[i].getString("Name");
-					String Namespace = row[i].getString("Namespace");
-
-					for(ExportedTypeRef exportedType : exportedTypes)
-					{
-						if(Name.equals(exportedType.getName()) && Namespace.equals(exportedType.getNamespace()))
-						{
-							typeRefs[i] = exportedType;
-						}
-					}
-					continue;
-				}
-
-				long[] token = tc.parseCodedIndex(coded, TableConstants.ResolutionScope);
-				String Namespace = row[i].getString("Namespace");
+				// ExportedType
 				String Name = row[i].getString("Name");
+				String Namespace = row[i].getString("Namespace");
 
-				switch((int) token[0])
+				for(ExportedTypeRef exportedType : exportedTypes)
 				{
-					case TableConstants.ModuleRef:
+					if(Name.equals(exportedType.getName()) && Namespace.equals(exportedType.getNamespace()))
 					{
-						ModuleTypeRef mod = new ModuleTypeRef(moduleRefs[(int) token[1] - 1], Namespace, Name);
-						typeRefs[i] = mod;
-						break;
+						typeRefs[i] = exportedType;
 					}
-
-					case TableConstants.TypeRef:
-					{
-						NestedTypeRef nest = new NestedTypeRef(Namespace, Name, typeRefs[(int) token[1] - 1]);
-						typeRefs[i] = nest;
-						break;
-					}
-
-					case TableConstants.AssemblyRef:
-					{
-						AssemblyTypeRef assem = new AssemblyTypeRef(assemblyRefs[(int) token[1] - 1], Namespace, Name);
-						typeRefs[i] = assem;
-						break;
-					}
-
-					case TableConstants.Module:
-					{
-						// (Implementation == 0x4?)
-						// search through TypeDefs for Name and Namespace
-						for(TypeDef typeDef : typeDefs)
-						{
-							if(typeDef.getName().equals(Name) && typeDef.getNamespace().equals(Namespace))
-							{
-								typeRefs[i] = typeDef;
-							}
-						}
-						break;
-					}
-					default:
-						System.out.println("Unsupported token in buildTypeRefs(): 0x" + Long.toHexString(token[0]));
-						break;
 				}
+				continue;
+			}
+
+			long[] token = tc.parseCodedIndex(coded, TableConstants.ResolutionScope);
+			String Namespace = row[i].getString("Namespace");
+			String Name = row[i].getString("Name");
+
+			switch((int) token[0])
+			{
+				case TableConstants.ModuleRef:
+				{
+					ModuleTypeRef mod = new ModuleTypeRef(moduleRefs[(int) token[1] - 1], Namespace, Name);
+					typeRefs[i] = mod;
+					break;
+				}
+
+				case TableConstants.TypeRef:
+				{
+					NestedTypeRef nest = new NestedTypeRef(Namespace, Name, typeRefs[(int) token[1] - 1]);
+					typeRefs[i] = nest;
+					break;
+				}
+
+				case TableConstants.AssemblyRef:
+				{
+					AssemblyTypeRef assem = new AssemblyTypeRef(assemblyRefs[(int) token[1] - 1], Namespace, Name);
+					typeRefs[i] = assem;
+					break;
+				}
+
+				case TableConstants.Module:
+				{
+					// (Implementation == 0x4?)
+					// search through TypeDefs for Name and Namespace
+					for(TypeDef typeDef : typeDefs)
+					{
+						if(typeDef.getName().equals(Name) && typeDef.getNamespace().equals(Namespace))
+						{
+							typeRefs[i] = typeDef;
+						}
+					}
+					break;
+				}
+				default:
+					System.out.println("Unsupported token in buildTypeRefs(): 0x" + Long.toHexString(token[0]));
+					break;
 			}
 		}
 	}
 
 	private void buildTypeSpecs()
 	{
-		// build TypeSpecs (after TypeDef and TypeRef) DONE!
-		if(myTableValues[TableConstants.TypeSpec] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.TypeSpec);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.TypeSpec];
-			typeSpecs = new TypeSpec[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				typeSpecs[i] = new TypeSpec(null);
-			}
+			return;
+		}
 
-			byte[] blob = null;
-			TypeSignature sig = null;
-			for(int i = 0; i < row.length; i++)
-			{
-				blob = row[i].getBlob("Signature");
-				sig = TypeSignatureParser.parse(new ByteBuffer(blob), new TypeGroup(typeDefs, typeRefs, typeSpecs));
-				typeSpecs[i].setSignature(sig);
-				//module.addTypeSpec(typeSpecs[i]);
-			}
+		typeSpecs = new TypeSpec[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			typeSpecs[i] = new TypeSpec(null);
+		}
+
+		byte[] blob = null;
+		TypeSignature sig = null;
+		for(int i = 0; i < row.length; i++)
+		{
+			blob = row[i].getBlob("Signature");
+			sig = TypeSignatureParser.parse(new ByteBuffer(blob), new TypeGroup(typeDefs, typeRefs, typeSpecs));
+			typeSpecs[i].setSignature(sig);
+			//module.addTypeSpec(typeSpecs[i]);
 		}
 	}
 
-	private void setSuperClasses()
+	private void setSuperClasses(TypeDefTempInfo[] tempInfos)
 	{
-		// fill in Typedef extends (after TypeRef and TypeDef) DONE!
-		if(myTableValues[TableConstants.TypeDef] != null)
+		if(tempInfos == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.TypeDef];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		for(int i = 0; i < tempInfos.length; i++)
+		{
+			long coded = tempInfos[i].Extends;
+			if(coded != 0L)
 			{
-				long coded = row[i].getCodedIndex("Extends");
-				if(coded != 0L)
+				long[] token = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
+				if(token[0] == TableConstants.TypeDef)
 				{
-					long[] token = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
-					if(token[0] == TableConstants.TypeDef)
-					{
-						typeDefs[i].setSuperClass(getByLongIndex(typeDefs, token[1]));
-					}
-					else if(token[0] == TableConstants.TypeRef)
-					{
-						typeDefs[i].setSuperClass(getByLongIndex(typeRefs, token[1]));
-					}
-					else if(token[0] == TableConstants.TypeSpec)
-					{
-						typeDefs[i].setSuperClass(getByLongIndex(typeSpecs, token[1]));
-					}
-					else
-					{
-						throw new IllegalArgumentException();
-					}
+					typeDefs[i].setSuperClass(getByLongIndex(typeDefs, token[1]));
+				}
+				else if(token[0] == TableConstants.TypeRef)
+				{
+					typeDefs[i].setSuperClass(getByLongIndex(typeRefs, token[1]));
+				}
+				else if(token[0] == TableConstants.TypeSpec)
+				{
+					typeDefs[i].setSuperClass(getByLongIndex(typeSpecs, token[1]));
+				}
+				else
+				{
+					throw new IllegalArgumentException();
 				}
 			}
 		}
@@ -921,262 +971,273 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void setInterfaceImpls()
 	{
-		// build InterfaceImpls (after TypeGroup) DONE!
-		if(myTableValues[TableConstants.InterfaceImpl] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.InterfaceImpl);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.InterfaceImpl];
-			interfaceImpls = new InterfaceImplementation[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				long clazz = row[i].getTableIndex("Class");
-				TypeDef def = typeDefs[(int) clazz - 1];
-				long coded = row[i].getCodedIndex("Interface");
-				long inter[] = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
+			return;
+		}
 
-				if(inter[0] == TableConstants.TypeDef)
-				{
-					interfaceImpls[i] = new InterfaceImplementation(typeDefs[(int) inter[1] - 1]);
-				}
-				else if(inter[0] == TableConstants.TypeRef)
-				{
-					interfaceImpls[i] = new InterfaceImplementation(typeRefs[(int) inter[1] - 1]);
-				}
-				else if(inter[0] == TableConstants.TypeSpec)
-				{
-					interfaceImpls[i] = new InterfaceImplementation(typeSpecs[(int) inter[1] - 1]);
-				}
-				def.addInterface(interfaceImpls[i]);
+		interfaceImpls = new InterfaceImplementation[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			long clazz = row[i].getTableIndex("Class");
+			TypeDef def = typeDefs[(int) clazz - 1];
+			long coded = row[i].getCodedIndex("Interface");
+			long inter[] = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
+
+			if(inter[0] == TableConstants.TypeDef)
+			{
+				interfaceImpls[i] = new InterfaceImplementation(typeDefs[(int) inter[1] - 1]);
 			}
+			else if(inter[0] == TableConstants.TypeRef)
+			{
+				interfaceImpls[i] = new InterfaceImplementation(typeRefs[(int) inter[1] - 1]);
+			}
+			else if(inter[0] == TableConstants.TypeSpec)
+			{
+				interfaceImpls[i] = new InterfaceImplementation(typeSpecs[(int) inter[1] - 1]);
+			}
+			def.addInterface(interfaceImpls[i]);
 		}
 	}
 
 	private void buildProperties()
 	{
 		// build Properties DONE!
-		if(myTableValues[TableConstants.Property] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Property);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.Property];
-			properties = new Property[row.length];
-			for(int i = 0; i < row.length; i++)
-			{
-				String name = row[i].getString("Name");
-				int flags = row[i].getConstant("Flags").intValue();
-				byte[] blob = row[i].getBlob("Type");
-				PropertySignature sig = PropertySignature.parse(new ByteBuffer
-						(blob), group);
+			return;
+		}
 
-				properties[i] = new Property(name, flags, sig);
-			}
+		properties = new Property[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			String name = row[i].getString("Name");
+			int flags = row[i].getConstant("Flags").intValue();
+			byte[] blob = row[i].getBlob("Type");
+			PropertySignature sig = PropertySignature.parse(new ByteBuffer(blob), group);
+
+			properties[i] = new Property(name, flags, sig);
 		}
 	}
 
 	private void setPropertyMaps()
 	{
 		// build PropertyMap (after TypeDefs and Property) DONE!
-		if(myTableValues[TableConstants.PropertyMap] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.PropertyMap);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.PropertyMap];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		for(int i = 0; i < row.length; i++)
+		{
+			long parent = row[i].getTableIndex("Parent");
+			if(parent == 0)
 			{
-				long parent = row[i].getTableIndex("Parent");
-				if(parent == 0)
-				{
-					continue;
-				}
-				long propS = row[i].getTableIndex("PropertyList");
-				if(propS == 0 || myTableValues[TableConstants.Property] == null || propS > myTableValues[TableConstants.Property].length)
-				{
-					continue;
-				}
-				long propE = properties.length + 1;
-				if(i < row.length - 1)
-				{
-					propE = Math.min(propE, row[i + 1].getTableIndex("PropertyList").longValue());
-				}
-				for(long j = propS; j < propE; j++)
-				{
-					typeDefs[(int) parent - 1].addProperty(properties[(int) getProperty(j) - 1]);
-				}
+				continue;
+			}
+			long propS = row[i].getTableIndex("PropertyList");
+			if(propS == 0 || properties == null || propS > properties.length)
+			{
+				continue;
+			}
+			long propE = properties.length + 1;
+			if(i < row.length - 1)
+			{
+				propE = Math.min(propE, row[i + 1].getTableIndex("PropertyList").longValue());
+			}
+			for(long j = propS; j < propE; j++)
+			{
+				typeDefs[(int) parent - 1].addProperty(properties[(int) getProperty(j) - 1]);
 			}
 		}
 	}
 
 	private void setNestedClasses()
 	{
-		// build NestedClasses (after TypeDefs) DONE!
-		GenericTableValue[] tableValue = myTableValues[TableConstants.NestedClass];
-		if(tableValue != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.NestedClass);
+		if(row == null)
 		{
-			for(GenericTableValue aRow : tableValue)
-			{
-				long nest = aRow.getTableIndex("NestedClass");
-				long enclose = aRow.getTableIndex("EnclosingClass");
+			return;
+		}
 
-				getByLongIndex(typeDefs, enclose).addNestedClass(getByLongIndex(typeDefs, nest));
-			}
+		for(GenericTableValue aRow : row)
+		{
+			long nest = aRow.getTableIndex("NestedClass");
+			long enclose = aRow.getTableIndex("EnclosingClass");
+
+			getByLongIndex(typeDefs, enclose).addNestedClass(getByLongIndex(typeDefs, nest));
 		}
 	}
 
 	private void setClassLayouts()
 	{
-		// build ClassLayouts (after TypeDefs) DONE!
-		if(myTableValues[TableConstants.ClassLayout] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.ClassLayout);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.ClassLayout];
-			for(GenericTableValue aRow : row)
-			{
-				long typedef = aRow.getTableIndex("Parent");
-				int pSize = aRow.getConstant("PackingSize").intValue();
-				long cSize = aRow.getConstant("ClassSize").longValue();
+			return;
+		}
 
-				ClassLayout layout = new ClassLayout(pSize, cSize);
-				typeDefs[(int) typedef - 1].setClassLayout(layout);
-			}
+		for(GenericTableValue aRow : row)
+		{
+			long typedef = aRow.getTableIndex("Parent");
+			int pSize = aRow.getConstant("PackingSize").intValue();
+			long cSize = aRow.getConstant("ClassSize").longValue();
+
+			ClassLayout layout = new ClassLayout(pSize, cSize);
+			typeDefs[(int) typedef - 1].setClassLayout(layout);
 		}
 	}
 
 	private void setFieldRVAs()
 	{
-		// build FieldRVAs (after Fields)
-		if(myTableValues[TableConstants.FieldRVA] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.FieldRVA);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.FieldRVA];
-			for(GenericTableValue aRow : row)
-			{
-				long RVA = aRow.getConstant("RVA").longValue();
-				long field = getField(aRow.getTableIndex("Field"));
-				fields[(int) field - 1].setFieldRVA(RVA);
-			}
+			return;
+		}
+
+		for(GenericTableValue aRow : row)
+		{
+			long RVA = aRow.getConstant("RVA").longValue();
+			long field = getField(aRow.getTableIndex("Field"));
+			fields[(int) field - 1].setFieldRVA(RVA);
 		}
 	}
 
 	private void buildEvents()
 	{
-		// build Events (after TypeDef and TypeRef) DONE!
-		if(myTableValues[TableConstants.Event] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Event);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.Event];
-			events = new Event[row.length];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		events = new Event[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			String name = row[i].getString("Name");
+			int flags = row[i].getConstant("EventFlags").intValue();
+
+			Object handler = null;
+			long coded = row[i].getCodedIndex("EventType");
+			long[] token = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
+			if(token[0] == TableConstants.TypeDef)
 			{
-				String name = row[i].getString("Name");
-				int flags = row[i].getConstant("EventFlags").intValue();
-
-				Object handler = null;
-				long coded = row[i].getCodedIndex("EventType");
-				long[] token = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
-				if(token[0] == TableConstants.TypeDef)
-				{
-					handler = getByLongIndex(typeDefs, token[1]);
-				}
-				else if(token[0] == TableConstants.TypeRef)
-				{
-					handler = getByLongIndex(typeRefs, token[1]);
-				}
-				else if(token[0] == TableConstants.TypeSpec)
-				{
-					handler = getByLongIndex(typeSpecs, token[1]);
-				}
-				else
-				{
-					throw new IllegalArgumentException();
-				}
-
-				events[i] = new Event(name, flags, handler);
+				handler = getByLongIndex(typeDefs, token[1]);
 			}
+			else if(token[0] == TableConstants.TypeRef)
+			{
+				handler = getByLongIndex(typeRefs, token[1]);
+			}
+			else if(token[0] == TableConstants.TypeSpec)
+			{
+				handler = getByLongIndex(typeSpecs, token[1]);
+			}
+			else
+			{
+				throw new IllegalArgumentException();
+			}
+
+			events[i] = new Event(name, flags, handler);
 		}
 	}
 
 	private void setEventMaps()
 	{
-		// build EventMaps (after Event) DONE!
-		if(myTableValues[TableConstants.EventMap] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.EventMap);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.EventMap];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		for(int i = 0; i < row.length; i++)
+		{
+			long parent = row[i].getTableIndex("Parent");
+			long eventS = row[i].getTableIndex("EventList");
+			long eventE = events.length + 1;
+			if(i < row.length - 1)
 			{
-				long parent = row[i].getTableIndex("Parent");
-				long eventS = row[i].getTableIndex("EventList");
-				long eventE = events.length + 1;
-				if(i < row.length - 1)
-				{
-					eventE = Math.min(eventE, row[i + 1].getTableIndex("EventList").longValue());
-				}
-				for(long j = eventS; j < eventE; j++)
-				{
-					typeDefs[(int) parent - 1].addEvent(events[(int) getEvent(j) - 1]);
-				}
+				eventE = Math.min(eventE, row[i + 1].getTableIndex("EventList").longValue());
+			}
+			for(long j = eventS; j < eventE; j++)
+			{
+				typeDefs[(int) parent - 1].addEvent(events[(int) getEvent(j) - 1]);
 			}
 		}
 	}
 
 	private void setFieldMarshals()
 	{
-		// build FieldMarshals (after Field and Method) DONE!
-		if(myTableValues[TableConstants.FieldMarshal] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.FieldMarshal);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.FieldMarshal];
-			for(GenericTableValue aRow : row)
-			{
-				long[] index = tc.parseCodedIndex(aRow.getCodedIndex("Parent"), TableConstants.HasFieldMarshal);
-				byte[] blob = aRow.getBlob("NativeType");
-				MarshalSignature sig = MarshalSignature.parse(new ByteBuffer(blob));
+			return;
+		}
 
-				if(index[0] == TableConstants.Field) // Field
-				{
-					fields[(int) getField(index[1]) - 1].setFieldMarshal(sig);
-				}
-				else // Param
-				{
-					params[(int) getParam(index[1]) - 1].setFieldMarshal(sig);
-				}
+		for(GenericTableValue aRow : row)
+		{
+			long[] index = tc.parseCodedIndex(aRow.getCodedIndex("Parent"), TableConstants.HasFieldMarshal);
+			byte[] blob = aRow.getBlob("NativeType");
+			MarshalSignature sig = MarshalSignature.parse(new ByteBuffer(blob));
+
+			if(index[0] == TableConstants.Field) // Field
+			{
+				fields[(int) getField(index[1]) - 1].setFieldMarshal(sig);
+			}
+			else // Param
+			{
+				params[(int) getParam(index[1]) - 1].setFieldMarshal(sig);
 			}
 		}
 	}
 
 	private void setMethodSemantics()
 	{
-		// build MethodSemantics (after Method, Event, Property) DONE!
-		if(myTableValues[TableConstants.MethodSemantics] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.MethodSemantics);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.MethodSemantics];
-			for(GenericTableValue aRow : row)
-			{
-				long method = getMethod(aRow.getTableIndex("Method"));
-				int sem = aRow.getConstant("Semantics").intValue();
-				long coded = aRow.getCodedIndex("Association");
-				long token[] = tc.parseCodedIndex(coded, TableConstants.HasSemantics);
-				MethodDef meth = methods[(int) method - 1];
+			return;
+		}
 
-				if(token[0] == TableConstants.Event)
+		for(GenericTableValue aRow : row)
+		{
+			long method = getMethod(aRow.getTableIndex("Method"));
+			int sem = aRow.getConstant("Semantics").intValue();
+			long coded = aRow.getCodedIndex("Association");
+			long token[] = tc.parseCodedIndex(coded, TableConstants.HasSemantics);
+			MethodDef meth = methods[(int) method - 1];
+
+			if(token[0] == TableConstants.Event)
+			{
+				Event event = events[(int) getEvent(token[1]) - 1];
+				meth.setMethodSemantics(new MethodSemantics(sem, event));
+				if(sem == MethodSemantics.AddOn)
 				{
-					Event event = events[(int) getEvent(token[1]) - 1];
-					meth.setMethodSemantics(new MethodSemantics(sem, event));
-					if(sem == MethodSemantics.AddOn)
-					{
-						event.setAddOnMethod(meth);
-					}
-					else if(sem == MethodSemantics.RemoveOn)
-					{
-						event.setRemoveOnMethod(meth);
-					}
-					else if(sem == MethodSemantics.Fire)
-					{
-						event.setFireMethod(meth);
-					}
+					event.setAddOnMethod(meth);
 				}
-				else if(token[0] == TableConstants.Property)
+				else if(sem == MethodSemantics.RemoveOn)
 				{
-					Property prop = properties[(int) getProperty(token[1]) - 1];
-					meth.setMethodSemantics(new MethodSemantics(sem, prop));
-					if(sem == MethodSemantics.Getter)
-					{
-						prop.setGetter(meth);
-					}
-					else if(sem == MethodSemantics.Setter)
-					{
-						prop.setSetter(meth);
-					}
+					event.setRemoveOnMethod(meth);
+				}
+				else if(sem == MethodSemantics.Fire)
+				{
+					event.setFireMethod(meth);
+				}
+			}
+			else if(token[0] == TableConstants.Property)
+			{
+				Property prop = properties[(int) getProperty(token[1]) - 1];
+				meth.setMethodSemantics(new MethodSemantics(sem, prop));
+				if(sem == MethodSemantics.Getter)
+				{
+					prop.setGetter(meth);
+				}
+				else if(sem == MethodSemantics.Setter)
+				{
+					prop.setSetter(meth);
 				}
 			}
 		}
@@ -1184,97 +1245,99 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void setDefaultValues()
 	{
-		// build Constants (after Field, Property, Param) DONE!
-		if(myTableValues[TableConstants.Constant] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.Constant);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.Constant];
-			for(GenericTableValue aRow : row)
+			return;
+		}
+
+		for(GenericTableValue aRow : row)
+		{
+			byte[] blob = aRow.getBlob("Value");
+			long coded = aRow.getCodedIndex("Parent");
+			long token[] = tc.parseCodedIndex(coded, TableConstants.HasConst);
+			if(token[0] == TableConstants.Field)
 			{
-				byte[] blob = aRow.getBlob("Value");
-				long coded = aRow.getCodedIndex("Parent");
-				long token[] = tc.parseCodedIndex(coded, TableConstants.HasConst);
-				if(token[0] == TableConstants.Field)
-				{
-					fields[(int) getField(token[1]) - 1].setDefaultValue(blob);
-				}
-				else if(token[0] == TableConstants.Param)
-				{
-					params[(int) getParam(token[1]) - 1].setDefaultValue(blob);
-				}
-				else if(token[0] == TableConstants.Property)
-				{
-					properties[(int) getProperty(token[1]) - 1].setDefaultValue(blob);
-				}
+				fields[(int) getField(token[1]) - 1].setDefaultValue(blob);
+			}
+			else if(token[0] == TableConstants.Param)
+			{
+				params[(int) getParam(token[1]) - 1].setDefaultValue(blob);
+			}
+			else if(token[0] == TableConstants.Property)
+			{
+				properties[(int) getProperty(token[1]) - 1].setDefaultValue(blob);
 			}
 		}
 	}
 
 	private void buildMemberRefs()
 	{
-		// build MemberRefs (after TypeGroup, Method, Field)
-		if(myTableValues[TableConstants.MemberRef] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.MemberRef);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.MemberRef];
-			memberRefs = new MemberRef[row.length];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		memberRefs = new MemberRef[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			byte[] blob = row[i].getBlob("Signature");
+			if((blob[0] & 0x0F) == CallingConvention.FIELD)
 			{
-				byte[] blob = row[i].getBlob("Signature");
-				if((blob[0] & 0x0F) == CallingConvention.FIELD)
-				{
-					// FIELDREF
-					long coded = row[i].getCodedIndex("Class");
-					long newtok[] = tc.parseCodedIndex(coded, TableConstants.MemberRefParent);
-					String name = row[i].getString("Name");
-					FieldSignature sig = FieldSignature.parse(new ByteBuffer(blob),
-							group);
+				// FIELDREF
+				long coded = row[i].getCodedIndex("Class");
+				long newtok[] = tc.parseCodedIndex(coded, TableConstants.MemberRefParent);
+				String name = row[i].getString("Name");
+				FieldSignature sig = FieldSignature.parse(new ByteBuffer(blob),
+						group);
 
-					if(newtok[0] == TableConstants.TypeRef)
-					{
-						memberRefs[i] = new FieldRef(name, sig, typeRefs[(int) newtok[1] - 1]);
-					}
-					else if(newtok[0] == TableConstants.ModuleRef)
-					{
-						memberRefs[i] = new GlobalFieldRef(moduleRefs[(int) newtok[1] - 1], name, sig);
-					}
-					else if(newtok[0] == TableConstants.TypeSpec)
-					{
-						memberRefs[i] = new FieldRef(name, sig, typeSpecs[(int) newtok[1] - 1]);
-					}
-					else if(newtok[0] == TableConstants.TypeDef)
-					{
-						memberRefs[i] = new FieldRef(name, sig, typeDefs[(int) newtok[1] - 1]);
-					}
+				if(newtok[0] == TableConstants.TypeRef)
+				{
+					memberRefs[i] = new FieldRef(name, sig, typeRefs[(int) newtok[1] - 1]);
 				}
-				else
+				else if(newtok[0] == TableConstants.ModuleRef)
 				{
-					// METHODREF
-					long coded = row[i].getCodedIndex("Class");
-					long newtok[] = tc.parseCodedIndex(coded, TableConstants.MemberRefParent);
-					String name = row[i].getString("Name");
+					memberRefs[i] = new GlobalFieldRef(moduleRefs[(int) newtok[1] - 1], name, sig);
+				}
+				else if(newtok[0] == TableConstants.TypeSpec)
+				{
+					memberRefs[i] = new FieldRef(name, sig, typeSpecs[(int) newtok[1] - 1]);
+				}
+				else if(newtok[0] == TableConstants.TypeDef)
+				{
+					memberRefs[i] = new FieldRef(name, sig, typeDefs[(int) newtok[1] - 1]);
+				}
+			}
+			else
+			{
+				// METHODREF
+				long coded = row[i].getCodedIndex("Class");
+				long newtok[] = tc.parseCodedIndex(coded, TableConstants.MemberRefParent);
+				String name = row[i].getString("Name");
 
-					MethodSignature callsig = MethodSignature.parse(new ByteBuffer
-							(blob), group);
+				MethodSignature callsig = MethodSignature.parse(new ByteBuffer
+						(blob), group);
 
-					if(newtok[0] == TableConstants.TypeRef)
-					{
-						memberRefs[i] = new MethodRef(name, typeRefs[(int) newtok[1] - 1], callsig);
-					}
-					else if(newtok[0] == TableConstants.ModuleRef)
-					{
-						memberRefs[i] = new GlobalMethodRef(moduleRefs[(int) newtok[1] - 1], name, callsig);
-					}
-					else if(newtok[0] == TableConstants.Method)
-					{
-						memberRefs[i] = new VarargsMethodRef(methods[(int) getMethod(newtok[1]) - 1], callsig);
-					}
-					else if(newtok[0] == TableConstants.TypeSpec)
-					{
-						memberRefs[i] = new MethodRef(name, typeSpecs[(int) newtok[1] - 1], callsig);
-					}
-					else if(newtok[0] == TableConstants.TypeDef)
-					{
-						memberRefs[i] = new MethodRef(name, typeDefs[(int) newtok[1] - 1], callsig);
-					}
+				if(newtok[0] == TableConstants.TypeRef)
+				{
+					memberRefs[i] = new MethodRef(name, typeRefs[(int) newtok[1] - 1], callsig);
+				}
+				else if(newtok[0] == TableConstants.ModuleRef)
+				{
+					memberRefs[i] = new GlobalMethodRef(moduleRefs[(int) newtok[1] - 1], name, callsig);
+				}
+				else if(newtok[0] == TableConstants.Method)
+				{
+					memberRefs[i] = new VarargsMethodRef(methods[(int) getMethod(newtok[1]) - 1], callsig);
+				}
+				else if(newtok[0] == TableConstants.TypeSpec)
+				{
+					memberRefs[i] = new MethodRef(name, typeSpecs[(int) newtok[1] - 1], callsig);
+				}
+				else if(newtok[0] == TableConstants.TypeDef)
+				{
+					memberRefs[i] = new MethodRef(name, typeDefs[(int) newtok[1] - 1], callsig);
 				}
 			}
 		}
@@ -1282,81 +1345,83 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void setMethodMaps()
 	{
-		// build MethodImpls (after TypeGroup, MemberRef, Method)
-		if(myTableValues[TableConstants.MethodImpl] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.MethodImpl);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.MethodImpl];
-			for(GenericTableValue aRow : row)
+			return;
+		}
+
+		for(GenericTableValue aRow : row)
+		{
+			long typedef = aRow.getTableIndex("Class");
+			long coded = aRow.getCodedIndex("MethodDeclaration");
+			long decltoken[] = tc.parseCodedIndex(coded, TableConstants.MethodDefOrRef);
+			coded = aRow.getCodedIndex("MethodBody");
+			long bodytoken[] = tc.parseCodedIndex(coded, TableConstants.MethodDefOrRef);
+
+			MethodDefOrRef body = null, decl = null;
+
+			if(bodytoken[0] == TableConstants.Method)
 			{
-				long typedef = aRow.getTableIndex("Class");
-				long coded = aRow.getCodedIndex("MethodDeclaration");
-				long decltoken[] = tc.parseCodedIndex(coded, TableConstants.MethodDefOrRef);
-				coded = aRow.getCodedIndex("MethodBody");
-				long bodytoken[] = tc.parseCodedIndex(coded, TableConstants.MethodDefOrRef);
-
-				MethodDefOrRef body = null, decl = null;
-
-				if(bodytoken[0] == TableConstants.Method)
-				{
-					// Method
-					body = methods[(int) getMethod(bodytoken[1]) - 1];
-				}
-				else
-				{
-					// MemberRef
-					body = (MethodDefOrRef) memberRefs[(int) bodytoken[1] - 1];
-				}
-
-				if(decltoken[0] == TableConstants.Method)
-				{
-					// Method
-					decl = methods[(int) getMethod(decltoken[1]) - 1];
-				}
-				else
-				{
-					// MemberRef
-					decl = (MethodDefOrRef) memberRefs[(int) decltoken[1] - 1];
-				}
-
-				MethodMap map = new MethodMap(decl, body);
-				TypeDef def = typeDefs[(int) typedef - 1];
-				def.addMethodMap(map);
+				// Method
+				body = methods[(int) getMethod(bodytoken[1]) - 1];
 			}
+			else
+			{
+				// MemberRef
+				body = (MethodDefOrRef) memberRefs[(int) bodytoken[1] - 1];
+			}
+
+			if(decltoken[0] == TableConstants.Method)
+			{
+				// Method
+				decl = methods[(int) getMethod(decltoken[1]) - 1];
+			}
+			else
+			{
+				// MemberRef
+				decl = (MethodDefOrRef) memberRefs[(int) decltoken[1] - 1];
+			}
+
+			MethodMap map = new MethodMap(decl, body);
+			TypeDef def = typeDefs[(int) typedef - 1];
+			def.addMethodMap(map);
 		}
 	}
 
 	private void buildStandAloneSigs()
 	{
-		// build StandAloneSig table DONE!
-		if(myTableValues[TableConstants.StandAloneSig] != null)
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.StandAloneSig);
+		if(row == null)
 		{
-			GenericTableValue[] row = myTableValues[TableConstants.StandAloneSig];
-			standAloneSigs = new StandAloneSignature[row.length];
-			for(int i = 0; i < row.length; i++)
+			return;
+		}
+
+		standAloneSigs = new StandAloneSignature[row.length];
+		for(int i = 0; i < row.length; i++)
+		{
+			byte[] blob = row[i].getBlob("Signature");
+			if((blob[0] & 0x0F) == CallingConvention.LOCAL_SIG)
 			{
-				byte[] blob = row[i].getBlob("Signature");
-				if((blob[0] & 0x0F) == CallingConvention.LOCAL_SIG)
-				{
-					// LocalVarList
-					standAloneSigs[i] = LocalVarList.parse(new ByteBuffer(blob), group);
-				}
-				else if((blob[0] & 0x0F) == CallingConvention.FIELD)
-				{
-					// field
-					standAloneSigs[i] = FieldSignature.parse(new ByteBuffer(blob), group);
-				}
-				else
-				{
-					// MethodSignature
-					standAloneSigs[i] = MethodSignature.parse(new ByteBuffer(blob), group);
-				}
+				// LocalVarList
+				standAloneSigs[i] = LocalVarList.parse(new ByteBuffer(blob), group);
+			}
+			else if((blob[0] & 0x0F) == CallingConvention.FIELD)
+			{
+				// field
+				standAloneSigs[i] = FieldSignature.parse(new ByteBuffer(blob), group);
+			}
+			else
+			{
+				// MethodSignature
+				standAloneSigs[i] = MethodSignature.parse(new ByteBuffer(blob), group);
 			}
 		}
 	}
 
 	private void buildGenericParams()
 	{
-		GenericTableValue[] table = myTableValues[TableConstants.GenericParam];
+		GenericTableValue[] table = myTableValues.getAndDrop(TableConstants.GenericParam);
 		if(table == null)
 		{
 			return;
@@ -1392,7 +1457,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 	private void buildGenericParamConstraints()
 	{
-		GenericTableValue[] table = myTableValues[TableConstants.GenericParamConstraint];
+		GenericTableValue[] table = myTableValues.getAndDrop(TableConstants.GenericParamConstraint);
 		if(table == null)
 		{
 			return;
@@ -1425,126 +1490,122 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		}
 	}
 
+	private void setCustomAttributes()
+	{
+		GenericTableValue[] row = myTableValues.getAndDrop(TableConstants.CustomAttribute);
+		if(row == null)
+		{
+			return;
+		}
+
+		for(GenericTableValue aRow : row)
+		{
+			byte[] blob = aRow.getBlob("Value");
+			long coded = aRow.getCodedIndex("Type");
+			long[] token = tc.parseCodedIndex(coded, TableConstants.CustomAttributeType);
+
+			CustomAttribute ca = null;
+
+			if(token[0] == TableConstants.Method)
+			{
+				ca = new CustomAttribute(blob, methods[(int) getMethod(token[1]) - 1]);
+			}
+			else if(token[0] == TableConstants.MemberRef)
+			{
+				ca = new CustomAttribute(blob, (MethodDefOrRef) memberRefs[(int) token[1] - 1]);
+			}
+
+			assert ca != null;
+
+			coded = aRow.getCodedIndex("Parent");
+			token = tc.parseCodedIndex(coded, TableConstants.HasCustomAttribute);
+
+			if(token[0] == TableConstants.Method)
+			{
+				methods[(int) getMethod(token[1]) - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.Field)
+			{
+				fields[(int) getField(token[1]) - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.TypeRef)
+			{
+				typeRefs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.TypeDef)
+			{
+				typeDefs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.Param)
+			{
+				params[(int) getParam(token[1]) - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.InterfaceImpl)
+			{
+				interfaceImpls[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.MemberRef)
+			{
+				memberRefs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.Module)
+			{
+				addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.DeclSecurity)
+			{
+				declSecurities[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.Property)
+			{
+				properties[(int) getProperty(token[1]) - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.Event)
+			{
+				events[(int) getEvent(token[1]) - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.StandAloneSig)
+			{
+				standAloneSigs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.ModuleRef)
+			{
+				moduleRefs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.TypeSpec)
+			{
+				typeSpecs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.Assembly)
+			{
+				assemblyInfo.addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.AssemblyRef)
+			{
+				assemblyRefs[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.File)
+			{
+				fileReferences[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.ExportedType)
+			{
+				exportedTypes[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.ManifestResource)
+			{
+				mresources[(int) token[1] - 1].addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.GenericParam)
+			{
+				getByLongIndex(myGenericParams, token[1]).addCustomAttribute(ca);
+			}
+		}
+	}
+
 	private static <T> T getByLongIndex(T[] array, long index)
 	{
 		return array[(int) (index - 1)];
-	}
-
-	private static <T> void setByLongIndex(T[] array, long index, T value)
-	{
-		array[(int) (index - 1)] = value;
-	}
-
-	private void setCustomAttributes()
-	{
-		// build CustomAttribute table
-		if(myTableValues[TableConstants.CustomAttribute] != null)
-		{
-			GenericTableValue[] row = myTableValues[TableConstants.CustomAttribute];
-			for(GenericTableValue aRow : row)
-			{
-				byte[] blob = aRow.getBlob("Value");
-				long coded = aRow.getCodedIndex("Type");
-				long[] token = tc.parseCodedIndex(coded, TableConstants.CustomAttributeType);
-
-				CustomAttribute ca = null;
-
-				if(token[0] == TableConstants.Method)
-				{
-					ca = new CustomAttribute(blob, methods[(int) getMethod(token[1]) - 1]);
-				}
-				else if(token[0] == TableConstants.MemberRef)
-				{
-					ca = new CustomAttribute(blob, (MethodDefOrRef) memberRefs[(int) token[1] - 1]);
-				}
-
-				assert ca != null;
-
-				coded = aRow.getCodedIndex("Parent");
-				token = tc.parseCodedIndex(coded, TableConstants.HasCustomAttribute);
-
-				if(token[0] == TableConstants.Method)
-				{
-					methods[(int) getMethod(token[1]) - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.Field)
-				{
-					fields[(int) getField(token[1]) - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.TypeRef)
-				{
-					typeRefs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.TypeDef)
-				{
-					typeDefs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.Param)
-				{
-					params[(int) getParam(token[1]) - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.InterfaceImpl)
-				{
-					interfaceImpls[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.MemberRef)
-				{
-					memberRefs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.Module)
-				{
-					addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.DeclSecurity)
-				{
-					declSecurities[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.Property)
-				{
-					properties[(int) getProperty(token[1]) - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.Event)
-				{
-					events[(int) getEvent(token[1]) - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.StandAloneSig)
-				{
-					standAloneSigs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.ModuleRef)
-				{
-					moduleRefs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.TypeSpec)
-				{
-					typeSpecs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.Assembly)
-				{
-					assemblyInfo.addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.AssemblyRef)
-				{
-					assemblyRefs[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.File)
-				{
-					fileReferences[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.ExportedType)
-				{
-					exportedTypes[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.ManifestResource)
-				{
-					mresources[(int) token[1] - 1].addCustomAttribute(ca);
-				}
-				else if(token[0] == TableConstants.GenericParam)
-				{
-					getByLongIndex(myGenericParams, token[1]).addCustomAttribute(ca);
-				}
-			}
-		}
 	}
 
 	public AssemblyInfo getAssemblyInfo()

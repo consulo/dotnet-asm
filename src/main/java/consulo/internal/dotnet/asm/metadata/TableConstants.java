@@ -20,9 +20,11 @@
 package consulo.internal.dotnet.asm.metadata;
 
 import consulo.internal.dotnet.asm.io.MSILInputStream;
+import consulo.internal.dotnet.asm.mbel.GenericTableValues;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableDefinition;
 import consulo.internal.dotnet.asm.util.StringUtil;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -425,9 +427,12 @@ public class TableConstants
 	/**
 	 * Returns all the metadata tables (should not be called until after parseTables)
 	 */
-	public GenericTableValue[][] getTables()
+	@Nonnull
+	public GenericTableValues getTables()
 	{
-		return tables;
+		GenericTableValue[][] tables = this.tables;
+		this.tables = null;
+		return new GenericTableValues(tables);
 	}
 
 	/**

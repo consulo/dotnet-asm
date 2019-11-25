@@ -19,15 +19,14 @@
 
 package consulo.internal.dotnet.asm.mbel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import consulo.annotations.Immutable;
 import consulo.internal.dotnet.asm.signature.AssemblyFlags;
 import consulo.internal.dotnet.asm.signature.AssemblyHashAlgorithm;
 import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class contains the extra information that a prime module would have.
@@ -82,7 +81,6 @@ public class AssemblyInfo extends BaseCustomAttributeOwner implements HasSecurit
 	 * Returns a non-null array of the exported types in this assembly
 	 */
 	@Nonnull
-	@Immutable
 	public List<ExportedTypeRef> getExportedTypes()
 	{
 		return exportedTypes;

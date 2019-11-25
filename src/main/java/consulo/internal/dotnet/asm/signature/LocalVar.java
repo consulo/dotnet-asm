@@ -20,14 +20,13 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import consulo.annotations.Immutable;
-import javax.annotation.Nonnull;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class models a single local var, whereas LocalVarList
@@ -118,7 +117,6 @@ public class LocalVar extends Signature
 	 * Getter method for the Constraints applied to this local var
 	 */
 	@Nonnull
-	@Immutable
 	public List<Constraint> getConstraints()
 	{
 		return constraints;

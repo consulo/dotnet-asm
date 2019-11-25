@@ -20,14 +20,13 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import consulo.annotations.Immutable;
-import javax.annotation.Nonnull;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class describes a method signature
@@ -278,7 +277,6 @@ public class MethodSignature extends StandAloneSignature implements CallingConve
 	 *
 	 * @return an array of parameter signature, in order (will never be null, but may have 0 length)
 	 */
-	@Immutable
 	public List<ParameterSignature> getParameters()
 	{
 		return params;

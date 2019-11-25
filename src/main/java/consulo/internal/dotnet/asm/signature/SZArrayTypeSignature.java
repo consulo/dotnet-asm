@@ -20,7 +20,6 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import consulo.annotations.Immutable;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -119,7 +118,6 @@ public class SZArrayTypeSignature extends TypeSpecSignature
 	 * Getter method for the CustomModifiers applied to this signature
 	 */
 	@Nonnull
-	@Immutable
 	public List<CustomModifierSignature> getCustomMods()
 	{
 		return customMods;

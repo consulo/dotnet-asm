@@ -16,11 +16,10 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import java.util.List;
-
-import consulo.annotations.Immutable;
-import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.mbel.CustomAttribute;
+
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author VISTALL
@@ -30,7 +29,6 @@ public interface CustomAttributeOwner
 {
 	void addCustomAttribute(@Nonnull CustomAttribute ca);
 
-	@Immutable
 	@Nonnull
 	List<CustomAttribute> getCustomAttributes();
 

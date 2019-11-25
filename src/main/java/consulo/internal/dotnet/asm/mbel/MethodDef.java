@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import consulo.annotations.Immutable;
 import javax.annotation.Nonnull;
 import consulo.internal.dotnet.asm.signature.MethodAttributes;
 import consulo.internal.dotnet.asm.signature.MethodImplAttributes;
@@ -240,7 +239,6 @@ public class MethodDef extends MethodDefOrRef implements MethodAttributes,
 
 	@Nonnull
 	@Override
-	@Immutable
 	public List<GenericParamDef> getGenericParams()
 	{
 		return myGenericParamDefs;

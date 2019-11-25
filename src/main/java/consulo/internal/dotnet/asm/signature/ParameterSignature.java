@@ -20,7 +20,6 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import consulo.annotations.Immutable;
 import consulo.internal.dotnet.asm.io.ByteBuffer;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
@@ -140,7 +139,6 @@ public class ParameterSignature extends TypeSignature implements InnerTypeOwner
 	/**
 	 * Getter method for the CustomModifiers applied to this signature
 	 */
-	@Immutable
 	public List<CustomModifierSignature> getCustomModifiers()
 	{
 		return customMods;

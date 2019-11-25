@@ -2,7 +2,6 @@ package consulo.internal.dotnet.asm.mbel;
 
 import java.util.List;
 
-import consulo.annotations.Immutable;
 import javax.annotation.Nonnull;
 
 /**
@@ -13,7 +12,6 @@ public interface GenericParamOwner
 {
 	void addGenericParam(GenericParamDef genericParamDef);
 
-	@Immutable
 	@Nonnull
 	List<GenericParamDef> getGenericParams();
 }

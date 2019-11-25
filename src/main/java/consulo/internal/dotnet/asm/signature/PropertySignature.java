@@ -20,14 +20,13 @@
 
 package consulo.internal.dotnet.asm.signature;
 
+import consulo.internal.dotnet.asm.io.ByteBuffer;
+import consulo.internal.dotnet.asm.mbel.TypeGroup;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import consulo.annotations.Immutable;
-import javax.annotation.Nonnull;
-import consulo.internal.dotnet.asm.io.ByteBuffer;
-import consulo.internal.dotnet.asm.mbel.TypeGroup;
 
 /**
  * This class describes the signature of a Property
@@ -129,7 +128,6 @@ public class PropertySignature extends Signature implements CallingConvention
 	}
 
 	@Nonnull
-	@Immutable
 	public List<ParameterSignature> getParameters()
 	{
 		return params;

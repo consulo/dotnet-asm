@@ -16,7 +16,6 @@
 
 package consulo.internal.dotnet.asm.signature;
 
-import consulo.annotations.Immutable;
 import consulo.internal.dotnet.asm.mbel.CustomAttribute;
 
 import javax.annotation.Nonnull;
@@ -50,7 +49,6 @@ public class BaseCustomAttributeOwner implements CustomAttributeOwner
 	 */
 	@Nonnull
 	@Override
-	@Immutable
 	public List<CustomAttribute> getCustomAttributes()
 	{
 		return myCustomAttributes;

@@ -19,13 +19,12 @@
 
 package consulo.internal.dotnet.asm.mbel;
 
+import consulo.internal.dotnet.asm.signature.TypeAttributes;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nonnull;
-import consulo.annotations.Immutable;
-import consulo.internal.dotnet.asm.signature.TypeAttributes;
 
 /**
  * This class represents a .NET type definition (analogous to a Class in Java).
@@ -241,7 +240,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 * Returns the nested classes defined within this TypeDef.
 	 * This array may have length 0, but will never be null.
 	 */
-	@Immutable
 	@Nonnull
 	public List<TypeDef> getNestedClasses()
 	{
@@ -312,7 +310,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @return a non-null array of Events
 	 */
-	@Immutable
 	public List<Event> getEvents()
 	{
 		return events;
@@ -359,7 +356,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @return a non-null array of fields
 	 */
-	@Immutable
 	public List<Field> getFields()
 	{
 		return fields;
@@ -420,7 +416,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 * @return a non-null array of methods
 	 */
 	@Nonnull
-	@Immutable
 	public List<MethodDef> getMethods()
 	{
 		return methods;
@@ -466,7 +461,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 * @return a non-null array of properties
 	 */
 	@Nonnull
-	@Immutable
 	public List<Property> getProperties()
 	{
 		return properties;
@@ -521,7 +515,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 * @return a non-null array of interfaces
 	 */
 	@Nonnull
-	@Immutable
 	public List<InterfaceImplementation> getInterfaceImplementations()
 	{
 		return interfaces;
@@ -592,7 +585,6 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 
 	@Nonnull
 	@Override
-	@Immutable
 	public List<GenericParamDef> getGenericParams()
 	{
 		return myGenericParamDefs;

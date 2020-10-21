@@ -40,6 +40,10 @@
 		</repository>
 	</repositories>
 
+	<properties>
+		<java.level>11</java.level>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>consulo</groupId>

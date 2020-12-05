@@ -20,7 +20,6 @@ import consulo.internal.dotnet.asm.mbel.CustomAttribute;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,7 +28,7 @@ import java.util.List;
  */
 public class BaseCustomAttributeOwner implements CustomAttributeOwner
 {
-	private List<CustomAttribute> myCustomAttributes = Collections.emptyList();
+	private List<CustomAttribute> myCustomAttributes = List.of();
 
 	/**
 	 * Adds a CustomAttribute to this MemberRef
@@ -37,9 +36,9 @@ public class BaseCustomAttributeOwner implements CustomAttributeOwner
 	@Override
 	public void addCustomAttribute(@Nonnull CustomAttribute ca)
 	{
-		if(myCustomAttributes == Collections.<CustomAttribute>emptyList())
+		if(myCustomAttributes.isEmpty())
 		{
-			myCustomAttributes = new ArrayList<CustomAttribute>();
+			myCustomAttributes = new ArrayList<>();
 		}
 		myCustomAttributes.add(ca);
 	}

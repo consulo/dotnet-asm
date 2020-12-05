@@ -233,6 +233,8 @@ public class TableConstants
 	// INDEX_BITS[i]+BITS[i] determines the coded index size
 
 	// coded indexes
+	// see Mono.Cecil
+	// Utilities.CompressMetadataToken
 	public static final int[][] TABLE_OPTIONS = {
 			/*TypeDefOrRef*/
 			{
@@ -267,7 +269,9 @@ public class TableConstants
 					File,
 					ExportedType,
 					ManifestResource,
-					GenericParam
+					GenericParam,
+					GenericParamConstraint,
+					MethodSpec
 			},
 			/*HasFieldMarshal*/
 			{

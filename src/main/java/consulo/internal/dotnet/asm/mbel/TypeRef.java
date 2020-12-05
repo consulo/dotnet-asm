@@ -34,7 +34,6 @@ public abstract class TypeRef extends AbstractTypeReference
 	private String Name;
 	private String Namespace;
 
-
 	/**
 	 * Makes a TypeRef with the given name and namespace.
 	 *

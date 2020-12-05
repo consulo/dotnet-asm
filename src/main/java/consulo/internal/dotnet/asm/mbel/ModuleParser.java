@@ -26,6 +26,8 @@ import consulo.internal.dotnet.asm.metadata.TableConstants;
 import consulo.internal.dotnet.asm.parse.MSILParseException;
 import consulo.internal.dotnet.asm.parse.PEModule;
 import consulo.internal.dotnet.asm.signature.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,6 +44,8 @@ import java.util.List;
  */
 public class ModuleParser extends BaseCustomAttributeOwner
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ModuleParser.class);
+
 	private static class TypeDefTempInfo
 	{
 		long FieldList;
@@ -49,7 +53,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 		long Extends;
 	}
 
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 
 	@Nonnull
 	public static AssemblyInfo parseAssemblyInfo(File file) throws IOException, MSILParseException
@@ -71,6 +75,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	private TypeSpec[] typeSpecs = null;
 	private MethodDef[] methods = null;
 	private GenericParamDef[] myGenericParams;
+	private GenericParamConstraintDef[] myGenericParamConstraints;
 	private Field[] fields = null;
 	private ParameterInfo[] params = null;
 	private Property[] properties = null;
@@ -1463,6 +1468,9 @@ public class ModuleParser extends BaseCustomAttributeOwner
 			return;
 		}
 
+		myGenericParamConstraints = new GenericParamConstraintDef[table.length];
+
+		int i = 0;
 		for(GenericTableValue genericTableValue : table)
 		{
 			long parent = genericTableValue.getTableIndex("Parent");
@@ -1472,21 +1480,29 @@ public class ModuleParser extends BaseCustomAttributeOwner
 
 			GenericParamDef paramDef = getByLongIndex(myGenericParams, parent);
 			assert paramDef != null : parent;
+
+			AbstractTypeReference typeReference = null;
 			if(values[0] == TableConstants.TypeDef)
 			{
-				TypeDef value = getByLongIndex(typeDefs, values[1]);
-				paramDef.addConstraint(value);
+				typeReference = getByLongIndex(typeDefs, values[1]);
 			}
 			else if(values[0] == TableConstants.TypeRef)
 			{
-				TypeRef value = getByLongIndex(typeRefs, values[1]);
-				paramDef.addConstraint(value);
+				typeReference = getByLongIndex(typeRefs, values[1]);
 			}
 			else if(values[0] == TableConstants.TypeSpec)
 			{
-				TypeSpec value = getByLongIndex(typeSpecs, values[1]);
-				paramDef.addConstraint(value);
+				typeReference = getByLongIndex(typeSpecs, values[1]);
 			}
+
+			if(typeReference == null)
+			{
+				i ++;
+				LOG.warn("Unknown type for generuc param constraint " + Long.toHexString(values[0]));
+				continue;
+			}
+
+			myGenericParamConstraints[i++] = new GenericParamConstraintDef(typeReference);
 		}
 	}
 
@@ -1599,6 +1615,14 @@ public class ModuleParser extends BaseCustomAttributeOwner
 			else if(token[0] == TableConstants.GenericParam)
 			{
 				getByLongIndex(myGenericParams, token[1]).addCustomAttribute(ca);
+			}
+			else if(token[0] == TableConstants.GenericParamConstraint)
+			{
+				getByLongIndex(myGenericParamConstraints, token[1]).addCustomAttribute(ca);
+			}
+			else
+			{
+				LOG.warn("Unsupported parent type: " + Long.toHexString(token[0]));
 			}
 		}
 	}

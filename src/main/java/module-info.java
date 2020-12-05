@@ -4,6 +4,7 @@
  */
 module consulo.internal.dotnet.asm {
     requires consulo.annotation;
+    requires org.slf4j;
 
     exports consulo.internal.dotnet.asm;
     exports consulo.internal.dotnet.asm.io;

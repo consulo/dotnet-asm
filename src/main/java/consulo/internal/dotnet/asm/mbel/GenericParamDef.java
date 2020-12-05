@@ -1,11 +1,10 @@
 package consulo.internal.dotnet.asm.mbel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
 
 import javax.annotation.Nonnull;
-import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author VISTALL
@@ -15,7 +14,7 @@ public class GenericParamDef extends BaseCustomAttributeOwner
 {
 	private final String myName;
 	private final int myFlags;
-	private List<Object> myConstraints = Collections.emptyList();
+	private List<GenericParamConstraintDef> myConstraints = List.of();
 
 	public GenericParamDef(String name, int flags)
 	{
@@ -23,17 +22,17 @@ public class GenericParamDef extends BaseCustomAttributeOwner
 		myFlags = flags;
 	}
 
-	public void addConstraint(Object typeDef)
+	public void addConstraint(GenericParamConstraintDef genericParamConstraintDef)
 	{
 		if(myConstraints.isEmpty())
 		{
-			myConstraints = new ArrayList<Object>(2);   //TypeRef or TypeDef
+			myConstraints = new ArrayList<>();
 		}
-		myConstraints.add(typeDef);
+		myConstraints.add(genericParamConstraintDef);
 	}
 
 	@Nonnull
-	public List<Object> getConstraints()
+	public List<GenericParamConstraintDef> getConstraints()
 	{
 		return myConstraints;
 	}

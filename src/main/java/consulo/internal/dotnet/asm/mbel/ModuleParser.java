@@ -1126,7 +1126,7 @@ public class ModuleParser extends BaseCustomAttributeOwner
 			String name = row[i].getString("Name");
 			int flags = row[i].getConstant("EventFlags").intValue();
 
-			Object handler = null;
+			AbstractTypeReference handler = null;
 			long coded = row[i].getCodedIndex("EventType");
 			long[] token = tc.parseCodedIndex(coded, TableConstants.TypeDefOrRefOrSpec);
 			if(token[0] == TableConstants.TypeDef)

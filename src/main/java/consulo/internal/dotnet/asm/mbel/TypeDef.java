@@ -54,7 +54,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 
 	//////////////////////////
 	private ClassLayout classLayout;
-	private Object superClass;
+	private AbstractTypeReference superClass;
 
 	private DeclSecurity security;
 
@@ -217,7 +217,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 * Returns the superclass of this TypeDef. For interfaces, this will be null.
 	 * For ValueTypes, this should be System.ValueType or System.Enum
 	 */
-	public Object getSuperClass()
+	public AbstractTypeReference getSuperClass()
 	{
 		return superClass;
 	}
@@ -228,7 +228,7 @@ public class TypeDef extends TypeRef implements consulo.internal.dotnet.asm.mbel
 	 *
 	 * @param ref the TypeRef of the superclass
 	 */
-	public void setSuperClass(Object ref)
+	public void setSuperClass(AbstractTypeReference ref)
 	{
 		if((Flags & ClassSemanticsMask) != Interface)
 		{

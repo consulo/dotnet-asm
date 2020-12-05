@@ -34,7 +34,7 @@ public class Event extends BaseCustomAttributeOwner implements EventAttributes
 
 	private int EventFlags;
 	private String Name;
-	private Object EventType; // type def, type ref, type spec
+	private AbstractTypeReference EventType; // type def, type ref, type spec
 	private MethodDef addOn, removeOn, fire;
 
 	/**
@@ -44,7 +44,7 @@ public class Event extends BaseCustomAttributeOwner implements EventAttributes
 	 * @param flags   a bit vector of event flags, as defined in EventAttributes
 	 * @param handler the TypeRef of the handler for this event
 	 */
-	public Event(String name, int flags, Object handler)
+	public Event(String name, int flags, AbstractTypeReference handler)
 	{
 		Name = name;
 		EventFlags = flags;
@@ -122,7 +122,7 @@ public class Event extends BaseCustomAttributeOwner implements EventAttributes
 	/**
 	 * Returns the TypeRef of the handler for this event
 	 */
-	public Object getEventType()
+	public AbstractTypeReference getEventType()
 	{
 		return EventType;
 	}
@@ -130,7 +130,7 @@ public class Event extends BaseCustomAttributeOwner implements EventAttributes
 	/**
 	 * Sets the TypeRef for the handler for this event
 	 */
-	public void setEventType(Object type)
+	public void setEventType(AbstractTypeReference type)
 	{
 		EventType = type;
 	}

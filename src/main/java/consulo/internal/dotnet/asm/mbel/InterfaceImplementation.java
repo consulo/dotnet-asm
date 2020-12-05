@@ -31,14 +31,14 @@ import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
  */
 public class InterfaceImplementation extends BaseCustomAttributeOwner
 {
-	private Object interfaceType;
+	private AbstractTypeReference interfaceType;
 
 	/**
 	 * Makes a new InterfaceImplementation object for the given interface
 	 *
 	 * @param ref a TypeRef that represents an interface
 	 */
-	public InterfaceImplementation(Object ref)
+	public InterfaceImplementation(AbstractTypeReference ref)
 	{
 		interfaceType = ref;
 	}
@@ -46,7 +46,7 @@ public class InterfaceImplementation extends BaseCustomAttributeOwner
 	/**
 	 * Returns the TypeRef of the interface.
 	 */
-	public Object getInterface()
+	public AbstractTypeReference getInterface()
 	{
 		return interfaceType;
 	}

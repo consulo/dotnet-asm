@@ -46,9 +46,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>consulo</groupId>
-			<artifactId>consulo-annotation</artifactId>
-			<version>3-SNAPSHOT</version>
+			<groupId>consulo.internal</groupId>
+			<artifactId>jsr305</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

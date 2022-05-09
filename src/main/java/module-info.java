@@ -3,7 +3,7 @@
  * @since 2020-10-22
  */
 module consulo.internal.dotnet.asm {
-    requires consulo.annotation;
+    requires jsr305;
     requires org.slf4j;
 
     exports consulo.internal.dotnet.asm;

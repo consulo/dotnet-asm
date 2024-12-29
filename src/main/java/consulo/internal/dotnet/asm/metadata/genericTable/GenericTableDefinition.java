@@ -2,7 +2,7 @@ package consulo.internal.dotnet.asm.metadata.genericTable;
 
 import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.*;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;

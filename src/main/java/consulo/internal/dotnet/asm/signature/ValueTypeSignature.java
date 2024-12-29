@@ -25,7 +25,7 @@ import consulo.internal.dotnet.asm.mbel.AbstractTypeReference;
 import consulo.internal.dotnet.asm.mbel.TypeGroup;
 import consulo.internal.dotnet.asm.metadata.TableConstants;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * This class represents a ValueType type signature.

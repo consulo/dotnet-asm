@@ -18,7 +18,7 @@ package consulo.internal.dotnet.asm.signature;
 
 import consulo.internal.dotnet.asm.mbel.CustomAttribute;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**

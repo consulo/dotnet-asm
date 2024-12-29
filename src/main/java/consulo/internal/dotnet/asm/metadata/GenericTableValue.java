@@ -23,8 +23,8 @@ import consulo.internal.dotnet.asm.io.MSILInputStream;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableDefinition;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableFieldInfo;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.io.IOException;
 
 /**

@@ -2,8 +2,8 @@ package consulo.internal.dotnet.asm.mbel;
 
 import consulo.internal.dotnet.asm.metadata.GenericTableValue;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * @author VISTALL

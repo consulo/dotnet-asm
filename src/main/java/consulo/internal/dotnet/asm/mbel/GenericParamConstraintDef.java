@@ -2,7 +2,7 @@ package consulo.internal.dotnet.asm.mbel;
 
 import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * @author VISTALL

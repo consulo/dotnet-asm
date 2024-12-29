@@ -1,11 +1,11 @@
 package consulo.internal.dontnet.asm.test;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import consulo.internal.dotnet.asm.signature.*;
 import consulo.internal.dotnet.asm.mbel.TypeDef;
 import consulo.internal.dotnet.asm.mbel.TypeRef;
 import consulo.internal.dotnet.asm.mbel.TypeSpec;
+import consulo.internal.dotnet.asm.signature.*;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * @author VISTALL

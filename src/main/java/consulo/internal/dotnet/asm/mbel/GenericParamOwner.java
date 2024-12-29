@@ -2,7 +2,7 @@ package consulo.internal.dotnet.asm.mbel;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * @author VISTALL

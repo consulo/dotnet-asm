@@ -2,7 +2,7 @@ package consulo.internal.dotnet.asm.metadata.genericTable;
 
 import consulo.internal.dotnet.asm.metadata.genericTable.entryReader.EntryReader;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * @author VISTALL

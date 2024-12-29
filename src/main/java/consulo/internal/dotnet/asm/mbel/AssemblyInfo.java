@@ -23,7 +23,7 @@ import consulo.internal.dotnet.asm.signature.AssemblyFlags;
 import consulo.internal.dotnet.asm.signature.AssemblyHashAlgorithm;
 import consulo.internal.dotnet.asm.signature.BaseCustomAttributeOwner;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

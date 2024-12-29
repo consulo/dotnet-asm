@@ -24,7 +24,7 @@ import consulo.internal.dotnet.asm.mbel.GenericTableValues;
 import consulo.internal.dotnet.asm.metadata.genericTable.GenericTableDefinition;
 import consulo.internal.dotnet.asm.util.StringUtil;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 
 /**

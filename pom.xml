@@ -32,7 +32,7 @@
     <repositories>
         <repository>
             <id>consulo</id>
-            <url>https://maven.consulo.io/repository/snapshots/</url>
+            <url>https://maven.consulo.dev/repository/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>interval:60</updatePolicy>
@@ -53,13 +53,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.0-alpha1</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.0-alpha1</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

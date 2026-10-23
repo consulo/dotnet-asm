@@ -1646,4 +1646,12 @@ public class ModuleParser extends BaseCustomAttributeOwner
 	{
 		return myGenericParams;
 	}
+
+	/**
+	 * Manifest resources of the module: embedded ({@link LocalManifestResource}) or located in other files and assemblies
+	 */
+	public ManifestResource[] getManifestResources()
+	{
+		return mresources == null ? new ManifestResource[0] : mresources;
+	}
 }

@@ -1,5 +1,6 @@
 package consulo.internal.dontnet.asm.test;
 
+import consulo.internal.dotnet.asm.mbel.MethodDef;
 import consulo.PathSearcher;
 import consulo.internal.dotnet.asm.mbel.GenericParamDef;
 import consulo.internal.dotnet.asm.mbel.ModuleParser;
@@ -98,6 +99,24 @@ public class DotNetAsmTest extends Assert
 	public void testIssue3$$Newtonsoft$Json$dll()
 	{
 		assertTrue(myModuleParser != null);
+
+		// the constraints are of their generic parameters - where T : JsonConverter and so on
+		int constraints = 0;
+		for(TypeDef typeDef : myModuleParser.getTypeDefs())
+		{
+			for(GenericParamDef genericParamDef : typeDef.getGenericParams())
+			{
+				constraints += genericParamDef.getConstraints().size();
+			}
+			for(MethodDef methodDef : typeDef.getMethods())
+			{
+				for(GenericParamDef genericParamDef : methodDef.getGenericParams())
+				{
+					constraints += genericParamDef.getConstraints().size();
+				}
+			}
+		}
+		assertTrue("no generic constraints", constraints > 0);
 	}
 
 	@Before

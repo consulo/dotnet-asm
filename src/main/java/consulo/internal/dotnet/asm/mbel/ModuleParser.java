@@ -1270,7 +1270,9 @@ public class ModuleParser extends BaseCustomAttributeOwner {
                 continue;
             }
 
-            myGenericParamConstraints[i++] = new GenericParamConstraintDef(typeReference);
+            GenericParamConstraintDef constraintDef = new GenericParamConstraintDef(typeReference);
+            paramDef.addConstraint(constraintDef);
+            myGenericParamConstraints[i++] = constraintDef;
         }
     }
 

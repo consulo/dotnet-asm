@@ -1360,7 +1360,11 @@ public class ModuleParser extends BaseCustomAttributeOwner {
                 getByLongIndex(myGenericParams, token[1]).addCustomAttribute(ca);
             }
             else if (token[0] == TableConstants.GenericParamConstraint) {
-                getByLongIndex(myGenericParamConstraints, token[1]).addCustomAttribute(ca);
+                // null - the type of the constraint is unknown, see buildGenericParamConstraints
+                GenericParamConstraintDef constraint = getByLongIndex(myGenericParamConstraints, token[1]);
+                if (constraint != null) {
+                    constraint.addCustomAttribute(ca);
+                }
             }
             else {
                 LOG.warn("Unsupported parent type: " + Long.toHexString(token[0]));

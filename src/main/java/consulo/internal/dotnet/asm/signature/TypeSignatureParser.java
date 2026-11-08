@@ -118,7 +118,8 @@ public class TypeSignatureParser implements SignatureConstants
 				return new TypeSignatureWithGenericParameters(mainType, list);
 			case ELEMENT_TYPE_CMOD_OPT:
 			case ELEMENT_TYPE_CMOD_REQD:
-				return CustomModifierSignature.parse(buffer, group);
+				// the modifiers of the type after them
+				return ModifiedTypeSignature.parse(buffer, group);
 			case ELEMENT_TYPE_BYREF:
 				return ParameterSignature.parse(buffer, group);
 			case ELEMENT_TYPE_PINNED:

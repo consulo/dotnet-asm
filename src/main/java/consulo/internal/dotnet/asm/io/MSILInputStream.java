@@ -22,8 +22,9 @@ package consulo.internal.dotnet.asm.io;
 import consulo.internal.dotnet.asm.parse.SectionHeader;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * This is an input stream that buffers the entire PE/COFF file in advance.
@@ -35,7 +36,7 @@ import java.io.IOException;
  */
 public class MSILInputStream implements Closeable
 {
-	private SeekableFileInputStream mySeekableFileInputStream;
+	private SeekableInputStream mySeekableFileInputStream;
 	private SectionHeader[] headers;
 	private final long size;
 
@@ -45,9 +46,10 @@ public class MSILInputStream implements Closeable
 	 * data that is available at the time the constructor is called (i.e. as much as is reported by
 	 * InputStream.available()).
 	 */
-	public MSILInputStream(File file) throws IOException
+	public MSILInputStream(Path file) throws IOException
 	{
-		mySeekableFileInputStream = new SeekableFileInputStream(file);
+		// a file of any file system
+		mySeekableFileInputStream = new SeekableChannelInputStream(Files.newByteChannel(file));
 		// reads in an entire input stream and buffers it
 		size = mySeekableFileInputStream.length();
 	}

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import java.io.File;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class ModuleParser extends BaseCustomAttributeOwner {
     public static final int VERSION = 2;
 
     @Nonnull
-    public static AssemblyInfo parseAssemblyInfo(File file) throws IOException, MSILParseException {
+    public static AssemblyInfo parseAssemblyInfo(Path file) throws IOException, MSILParseException {
         ModuleParser parser = new ModuleParser(file, TableConstants.Assembly);
         parser.buildAssemblyInfo();
         return parser.getAssemblyInfo();
@@ -100,11 +100,11 @@ public class ModuleParser extends BaseCustomAttributeOwner {
      * Makes a ClassParser that uses the given input stream.
      * It is assumed that the input stream is open to the beginning of a .NET module file.
      */
-    public ModuleParser(File file) throws IOException, MSILParseException {
+    public ModuleParser(Path file) throws IOException, MSILParseException {
         this(file, -1);
     }
 
-    private ModuleParser(File file, int tableIndexStop) throws IOException, MSILParseException {
+    private ModuleParser(Path file, int tableIndexStop) throws IOException, MSILParseException {
         in = new MSILInputStream(file);
         pe_module = new PEModule(in);
         tc = pe_module.metadata.parseTableConstants(in, tableIndexStop);

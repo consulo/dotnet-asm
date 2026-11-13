@@ -125,7 +125,7 @@ public class DotNetAsmTest extends Assert
 		String name = myTestName.getMethodName();
 		name = name.replace("$$", "/");
 		name = name.replace("$", ".");
-		ModuleParser moduleParser = new ModuleParser(PathSearcher.getTestPath(name));
+		ModuleParser moduleParser = new ModuleParser(PathSearcher.getTestPath(name).toPath());
 
 		myModuleParser = moduleParser;
 	}
